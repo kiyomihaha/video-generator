@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"git reset --soft HEAD~1 2>&1 && git reset HEAD . 2>&1 && git add .gitignore src/ public/.gitkeep public/specs/clock-to-q.json package.json tsconfig.json .claude/CLAUDE.md && git status --s...",
+  "error": "Exit code 128\nfatal: ambiguous argument 'HEAD~1': unknown revision or path not in the working tree.\nUse '--' to separate paths from revisions, like this:\n'git <command> [<revision>...] -- [<file>...]'",
+  "timestamp": "2026-05-25T09:39:26.013Z",
+  "retry_count": 1
+}

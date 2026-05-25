@@ -1,0 +1,23 @@
+{
+  "name": "video-generator",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "npx remotion studio",
+    "preview": "npx remotion studio",
+    "render": "npx remotion render src/index.ts \"$npm_config_video\" \"out/$npm_config_video.mp4\"",
+    "still": "npx remotion still src/index.ts \"$npm_config_video\" \"out/$npm_config_video-frame.png\" --frame=30"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.465",
+    "@remotion/media": "^4.0.465",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "remotion": "^4.0.465",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.15",
+    "typescript": "^6.0.3"
+  }
+}

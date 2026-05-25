@@ -1,0 +1,61 @@
+{
+  "title": "D Flip-Flop: Clock → Q",
+  "fps": 30,
+  "totalDuration": 6,
+  "signals": [
+    {
+      "name": "CLK",
+      "componentId": "dff",
+      "pinId": "clk",
+      "initialValue": 0,
+      "transitions": [
+        { "at": 0.5, "to": 1 },
+        { "at": 1.5, "to": 0 },
+        { "at": 2.5, "to": 1 },
+        { "at": 3.5, "to": 0 },
+        { "at": 4.5, "to": 1 },
+        { "at": 5.5, "to": 0 }
+      ]
+    },
+    {
+      "name": "D",
+      "componentId": "dff",
+      "pinId": "d",
+      "initialValue": 1,
+      "transitions": [
+        { "at": 0.0, "to": 1 }
+      ]
+    },
+    {
+      "name": "Q",
+      "componentId": "dff",
+      "pinId": "q",
+      "initialValue": 0,
+      "transitions": [
+        { "at": 0.68, "to": 1 }
+      ]
+    }
+  ],
+  "propagations": [
+    {
+      "signalName": "clk→q",
+      "from": { "componentId": "dff", "pinId": "clk", "portName": "CLK" },
+      "to": { "componentId": "dff", "pinId": "q", "portName": "Q" },
+      "timelineId": "main",
+      "triggerEdge": "posedge",
+      "edgePolarity": "active_high",
+      "initialState": "q=0",
+      "finalState": "q=1",
+      "delay": 0.5,
+      "duration": 0.18,
+      "timeScale": 1.0,
+      "emphasis": "glow-trace",
+      "stylePreset": "digital-blue",
+      "annotation": "posedge CLK → Q transitions after tCO delay"
+    }
+  ],
+  "annotations": [
+    { "at": 0.5, "text": "posedge CLK", "position": "top" },
+    { "at": 0.68, "text": "Q transitions 1", "position": "bottom" }
+  ]
+}

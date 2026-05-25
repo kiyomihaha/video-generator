@@ -1,0 +1,19 @@
+node_modules/
+out/
+dist/
+.gstack/
+
+# Large model files
+tools/
+checkpoints*/
+campplus_cache/
+w2v_bert/
+maskgct_cache/
+bigvgan_cache/
+
+# Generated audio
+public/*.wav
+public/*.mp3
+
+# Screenshots
+实测图片/
