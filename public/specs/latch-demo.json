@@ -1,0 +1,61 @@
+{
+  "title": "D-Latch: Transparent & Hold",
+  "fps": 30,
+  "totalDuration": 5,
+  "signals": [
+    {
+      "name": "EN",
+      "componentId": "latch",
+      "pinId": "en",
+      "initialValue": 0,
+      "transitions": [
+        { "at": 0.8, "to": 1, "label": "EN↑" },
+        { "at": 2.2, "to": 0, "label": "EN↓" },
+        { "at": 3.5, "to": 1, "label": "EN↑" },
+        { "at": 4.3, "to": 0, "label": "EN↓" }
+      ]
+    },
+    {
+      "name": "D",
+      "componentId": "latch",
+      "pinId": "d",
+      "initialValue": 0,
+      "transitions": [
+        { "at": 1.0, "to": 1 },
+        { "at": 1.8, "to": 0 },
+        { "at": 3.7, "to": 1 },
+        { "at": 4.6, "to": 0 }
+      ]
+    },
+    {
+      "name": "Q",
+      "componentId": "latch",
+      "pinId": "q",
+      "initialValue": 0,
+      "transitions": []
+    }
+  ],
+  "propagations": [],
+  "latches": [
+    {
+      "type": "latch",
+      "id": "dlatch0",
+      "enablePin": { "componentId": "latch", "pinId": "en", "portName": "EN" },
+      "dataPin": { "componentId": "latch", "pinId": "d", "portName": "D" },
+      "outputPin": { "componentId": "latch", "pinId": "q", "portName": "Q" },
+      "latchMode": "transparent_high",
+      "propagationDelay": 5,
+      "initialOutput": 0,
+      "visual": {
+        "holdHighlightDuration": 600,
+        "glowColor": "#c084fc",
+        "glowMaxOpacity": 0.1
+      }
+    }
+  ],
+  "annotations": [
+    { "at": 1.5, "text": "transparent: Q follows D", "position": "top" },
+    { "at": 2.8, "text": "hold: Q frozen", "position": "top" },
+    { "at": 3.9, "text": "transparent again", "position": "bottom" }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "title": "XOR Glitch: Race Hazard",
+  "fps": 60,
+  "totalDuration": 3,
+  "signals": [
+    {
+      "name": "A",
+      "componentId": "gate",
+      "pinId": "a",
+      "initialValue": 0,
+      "transitions": [
+        { "at": 0.50, "to": 1 },
+        { "at": 2.00, "to": 0 }
+      ]
+    },
+    {
+      "name": "B",
+      "componentId": "gate",
+      "pinId": "b",
+      "initialValue": 0,
+      "transitions": [
+        { "at": 0.54, "to": 1 },
+        { "at": 1.40, "to": 0 },
+        { "at": 2.04, "to": 1 }
+      ]
+    },
+    {
+      "name": "Y (A⊕B)",
+      "componentId": "gate",
+      "pinId": "y",
+      "initialValue": 0,
+      "transitions": [
+        { "at": 0.50, "to": 1 },
+        { "at": 0.54, "to": 0 },
+        { "at": 1.40, "to": 1 },
+        { "at": 2.00, "to": 0 },
+        { "at": 2.04, "to": 1 }
+      ]
+    }
+  ],
+  "propagations": [],
+  "glitches": [
+    {
+      "id": "g1",
+      "signalPin": { "componentId": "gate", "pinId": "y", "portName": "Y" },
+      "glitchType": "positive",
+      "startTime": 0.50,
+      "duration": 0.10,
+      "amplitude": 1.0,
+      "cause": "A↑ while B=0 → Y goes 1 briefly; B↑ at 0.54 → Y returns to 0",
+      "jagged": true
+    },
+    {
+      "id": "g2",
+      "signalPin": { "componentId": "gate", "pinId": "y", "portName": "Y" },
+      "glitchType": "negative",
+      "startTime": 2.00,
+      "duration": 0.10,
+      "amplitude": 1.0,
+      "cause": "A↓ while B=0 → Y goes 0 briefly; B↑ at 2.04 → Y returns to 1",
+      "jagged": true
+    }
+  ],
+  "annotations": [
+    { "at": 0.53, "text": "glitch: A↑ before B", "position": "top" },
+    { "at": 2.03, "text": "glitch: A↓ before B", "position": "bottom" }
+  ]
+}

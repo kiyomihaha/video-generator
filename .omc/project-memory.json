@@ -37,7 +37,7 @@
     "runtime": null
   },
   "build": {
-    "buildCommand": "node_modules/.bin/tsc --noEmit 2>&1 && node_modules/.bin/remotion still src/index.ts ClockToQ out/clock-to-q-approved.png --frame=90 2>&1",
+    "buildCommand": "node_modules/.bin/tsc --noEmit 2>&1 && node_modules/.bin/remotion still src/index.ts FanoutDemo out/fanout-test.png --frame=90 2>&1",
     "testCommand": null,
     "lintCommand": null,
     "devCommand": "npm run start",
@@ -113,8 +113,8 @@
   "hotPaths": [
     {
       "path": "src/scenes/DigitalTimingScene.tsx",
-      "accessCount": 34,
-      "lastAccessed": 1779699593999,
+      "accessCount": 39,
+      "lastAccessed": 1779702309603,
       "type": "file"
     },
     {
@@ -124,15 +124,15 @@
       "type": "file"
     },
     {
-      "path": "src/components/digital/SignalWave.tsx",
-      "accessCount": 8,
-      "lastAccessed": 1779697989936,
+      "path": "src/Root.tsx",
+      "accessCount": 9,
+      "lastAccessed": 1779702322401,
       "type": "file"
     },
     {
-      "path": "src/Root.tsx",
-      "accessCount": 7,
-      "lastAccessed": 1779693148990,
+      "path": "src/components/digital/SignalWave.tsx",
+      "accessCount": 8,
+      "lastAccessed": 1779697989936,
       "type": "file"
     },
     {
@@ -154,15 +154,15 @@
       "type": "file"
     },
     {
-      "path": "src/narration/index.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1779689095833,
+      "path": "src/motion/primitives/types.ts",
+      "accessCount": 3,
+      "lastAccessed": 1779702254373,
       "type": "file"
     },
     {
-      "path": "src/motion/primitives/types.ts",
+      "path": "src/narration/index.tsx",
       "accessCount": 2,
-      "lastAccessed": 1779697364321,
+      "lastAccessed": 1779689095833,
       "type": "file"
     },
     {
@@ -217,6 +217,24 @@
       "path": "实测图片/Phase1.1.png",
       "accessCount": 1,
       "lastAccessed": 1779694251804,
+      "type": "file"
+    },
+    {
+      "path": "src/components/digital/FanoutArrow.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1779702265522,
+      "type": "file"
+    },
+    {
+      "path": "public/specs/fanout-demo.json",
+      "accessCount": 1,
+      "lastAccessed": 1779702275768,
+      "type": "file"
+    },
+    {
+      "path": "src/fanout-demo/index.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1779702328464,
       "type": "file"
     }
   ],

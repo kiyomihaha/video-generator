@@ -1,0 +1,72 @@
+{
+  "title": "Clock Fanout: CLK → Q, D, EN",
+  "fps": 30,
+  "totalDuration": 6,
+  "signals": [
+    {
+      "name": "CLK",
+      "componentId": "sys",
+      "pinId": "clk",
+      "initialValue": 0,
+      "transitions": [
+        { "at": 0.5, "to": 1 },
+        { "at": 1.5, "to": 0 },
+        { "at": 2.5, "to": 1 },
+        { "at": 3.5, "to": 0 },
+        { "at": 4.5, "to": 1 },
+        { "at": 5.5, "to": 0 }
+      ]
+    },
+    {
+      "name": "Q",
+      "componentId": "sys",
+      "pinId": "q",
+      "initialValue": 0,
+      "transitions": [
+        { "at": 0.68, "to": 1 }
+      ]
+    },
+    {
+      "name": "D",
+      "componentId": "sys",
+      "pinId": "d",
+      "initialValue": 0,
+      "transitions": [
+        { "at": 0.95, "to": 1 }
+      ]
+    },
+    {
+      "name": "EN",
+      "componentId": "sys",
+      "pinId": "en",
+      "initialValue": 0,
+      "transitions": [
+        { "at": 1.2, "to": 1 }
+      ]
+    }
+  ],
+  "propagations": [
+    {
+      "signalName": "clk_fanout",
+      "from": { "componentId": "sys", "pinId": "clk", "portName": "CLK" },
+      "to": { "componentId": "sys", "pinId": "q", "portName": "Q" },
+      "fanoutEdges": [
+        { "pinId": "q", "delay": 0.18, "duration": 0.03, "label": "tCO" },
+        { "pinId": "d", "delay": 0.45, "duration": 0.05, "label": "tD" },
+        { "pinId": "en", "delay": 0.7, "duration": 0.07, "label": "tEN" }
+      ],
+      "timelineId": "main",
+      "triggerEdge": "posedge",
+      "initialState": "all=0",
+      "finalState": "all=1",
+      "delay": 0.5,
+      "duration": 0.18,
+      "timeScale": 1.0,
+      "emphasis": "glow-trace",
+      "stylePreset": "digital-blue"
+    }
+  ],
+  "annotations": [
+    { "at": 1.2, "text": "EN triggered last", "position": "bottom" }
+  ]
+}

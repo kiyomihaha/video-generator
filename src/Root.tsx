@@ -4,6 +4,9 @@ import { Hello } from "./hello/index";
 import { TitleOpen, titleOpenSchema } from "./title-open/index";
 import { NarrationVideo } from "./narration/index";
 import { ClockToQDemo } from "./digital-demo/index";
+import { FanoutDemo } from "./fanout-demo/index";
+import { LatchDemo } from "./latch-demo/index";
+import { GlitchDemo } from "./glitch-demo/index";
 import type { z } from "zod";
 
 type TitleOpenProps = z.infer<typeof titleOpenSchema>;
@@ -51,6 +54,30 @@ export const RemotionRoot = () => {
         fps={30}
         width={1080}
         height={600}
+      />
+      <Composition
+        id="FanoutDemo"
+        component={FanoutDemo}
+        durationInFrames={180}
+        fps={30}
+        width={1080}
+        height={720}
+      />
+      <Composition
+        id="LatchDemo"
+        component={LatchDemo}
+        durationInFrames={150}
+        fps={30}
+        width={1280}
+        height={720}
+      />
+      <Composition
+        id="GlitchDemo"
+        component={GlitchDemo}
+        durationInFrames={180}
+        fps={60}
+        width={1280}
+        height={720}
       />
     </>
   );
