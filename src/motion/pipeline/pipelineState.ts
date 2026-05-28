@@ -8,14 +8,7 @@ import type {
   CellRenderState,
   ForwardRenderState,
 } from "./types";
-
-function clamp01(v: number): number {
-  return Math.max(0, Math.min(1, v));
-}
-
-function easeOutCubic(t: number): number {
-  return 1 - Math.pow(1 - t, 3);
-}
+import { clamp01, easeOutCubic } from "../utils";
 
 export function pipelineState(
   schedule: PipelineSchedule,

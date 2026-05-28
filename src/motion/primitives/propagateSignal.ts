@@ -1,4 +1,5 @@
 import type { PropagateSignalSpec } from "./types";
+import { clamp01, easeOutCubic } from "../utils";
 
 export interface AnimationState {
   progress: number;
@@ -10,13 +11,6 @@ export interface AnimationState {
 }
 
 const DEFAULT_ARROW_LEN = 260;
-
-const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
-
-const easeOutCubic = (value: number) => {
-  const t = clamp01(value);
-  return 1 - Math.pow(1 - t, 3);
-};
 
 const pulseEnvelope = (elapsedFrames: number, fps: number) => {
   if (elapsedFrames < 0) return 0;

@@ -1,4 +1,5 @@
 import type { MetastabilitySpec } from "./types";
+import { clamp01 } from "../utils";
 
 export interface MetastabilityState {
   /** True from startTime through end of scene; false before startTime */
@@ -17,10 +18,6 @@ export interface MetastabilityState {
   resolvedValue: 0 | 1;
   /** 0-1 through overshoot decay (0 = no overshoot, >0 = decaying) */
   overshootProgress: number;
-}
-
-function clamp01(v: number): number {
-  return Math.max(0, Math.min(1, v));
 }
 
 /**

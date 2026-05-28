@@ -1,4 +1,5 @@
 import type { LatchSpec, TimelineSignal, TimelineTransition } from "./types";
+import { clamp01, easeOutCubic } from "../utils";
 
 export interface LatchState {
   /** Whether enable is currently active (transparent window open) */
@@ -156,14 +157,6 @@ export function latchSignal(
     latchIntensity,
     snapLockIntensity,
   };
-}
-
-function clamp01(v: number): number {
-  return Math.max(0, Math.min(1, v));
-}
-
-function easeOutCubic(t: number): number {
-  return 1 - Math.pow(1 - clamp01(t), 3);
 }
 
 /**

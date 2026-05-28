@@ -1,4 +1,5 @@
 import type { GlitchSpec } from "./types";
+import { clamp01 } from "../utils";
 
 export interface GlitchState {
   /** Whether the glitch is currently active (within its time window) */
@@ -9,10 +10,6 @@ export interface GlitchState {
   amplitude: number;
   /** Jagged offset for SVG path perturbation (scales with amplitude) */
   jitter: number;
-}
-
-function clamp01(v: number): number {
-  return Math.max(0, Math.min(1, v));
 }
 
 /** Deterministic pseudo-random based on glitch id + local frame (no Math.random) */
