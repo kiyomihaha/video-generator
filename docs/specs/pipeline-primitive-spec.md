@@ -1,4 +1,4 @@
-# Pipeline Visualization Motion Primitive — Design Spec (v2)
+# Pipeline Visualization Motion Primitive — Design Spec (v3)
 
 ## 1. Problem Statement
 
@@ -87,11 +87,9 @@ interface StallHazard {
 interface ForwardHazard {
   type: "forward";
   producerInstruction: string;              // instruction that produces the data
-  producerStage: number;                    // stage index of producer when data is available
-  producerCycle: number;                    // 1-based cycle when data is available
+  producerStage: number;                    // 0-based stage index (engine resolves cycle from grid)
   consumerInstruction: string;              // instruction that needs the data
-  consumerStage: number;                    // stage index of consumer when data is needed
-  consumerCycle: number;                    // 1-based cycle when consumer needs data
+  consumerStage: number;                    // 0-based stage index (engine resolves cycle from grid)
   operand?: "rs1" | "rs2" | "rt";          // which operand is forwarded (for multi-forward arrows)
   reason?: string;                          // annotation text (e.g. "EX/MEM → EX forwarding")
 }
@@ -107,7 +105,7 @@ interface FlushHazard {
 }
 ```
 
-**Why explicit cycles?** Without `atCycle`, `producerCycle`, `consumerCycle`, the scheduler cannot place forwarding arrows or bubbles correctly once stalls shift instructions. Cycle coordinates are required.
+**Why auto-resolve forward cycles?** The engine searches the resolved grid for `(instructionId, stageIndex)` after all stalls are applied. This eliminates manual `producerCycle`/`consumerCycle` fields that became stale when stall logic changed.
 
 **Why discriminated union?** Each hazard type has completely different fields. A single flat interface with optional fields creates ambiguity.
 
@@ -140,28 +138,20 @@ computePipelineSchedule(spec: PipelineSpec): PipelineSchedule
 - Pure function, no frame/fps dependency
 - Called once per composition mount
 
-**Algorithm:**
+**Algorithm (v3 — per-stage offset array):**
 
-1. Build ideal occupancy grid: for each instruction, place it at `stage[i] = entryCycle + i`
-2. Sort hazards by `atCycle` (stalls), then `resolveCycle` (flushes), then by array order
-3. Apply stalls:
-   - At `atCycle`, freeze `affectedInstruction` at `holdStage`
-   - Insert bubble at `bubbleStage`
-   - Shift all younger instructions (higher entryCycle) right by `duration`
-   - Shift cascades: if I2 stalls 1 cycle, I3/I4/I5 all shift 1 cycle
-4. Apply flushes:
-   - At `resolveCycle`, mark `flushedInstructions` cells from `resolveStage` onward as "flushed"
-   - Flushed instructions stop progressing (no cells after flush point)
-5. Apply forwards:
-   - Locate producer cell at `(producerCycle, producerStage)` — must exist after stall resolution
-   - Locate consumer cell at `(consumerCycle, consumerStage)` — must exist after stall resolution
-   - Attach forward arrow metadata to consumer cell
-   - Support multiple forwards to same consumer (different `operand` values)
-6. Validate:
-   - No two instructions occupy the same (cycle, stage) cell → throw
-   - All hazard instruction IDs exist in instructions array → throw
-   - All hazard cycle/stage coordinates are within bounds → throw
-   - Forward producer/consumer cells exist after schedule resolution → throw
+1. **Validate** (Step 0): bounds, types, uniqueness for all spec fields and hazard references
+2. **Pre-compute per-instruction per-stage offsets** (Step 1):
+   - `stageOffsets[instrId][stageIndex]` = extra delay at each stage
+   - Affected instruction: offset += duration for stages > holdStage
+   - Younger instructions entering **during** stall window: IF offset = 0, downstream offset = remaining stall cycles
+   - Younger instructions entering **after** stall window: all stages offset = duration
+3. **Build empty grid** (Step 2): numStages × totalCycles
+4. **Single-pass placement** (Step 3): place each instruction at `entryCycle - 1 + si + offsets[si]`, collision-checked via occupancy Set
+5. **Fill held ghost cells** (Step 3b): consecutive cells at holdStage for affected instruction, and at IF for younger instructions entering during stall window
+6. **Bubbles** (Step 4): placed at `entryCycle - 1 + bubbleStage + priorOffset + d`, flow downstream
+7. **Flushes** (Step 5): mark cells from resolveStage onward where `cycle >= resolveCycle - 1`
+8. **Forward auto-resolution** (Step 6): search grid for `(instructionId, stageIndex)` matching `state === "active"` — no manual cycle fields needed
 
 **Output type:**
 
@@ -178,7 +168,7 @@ interface ScheduledCell {
   instruction: string | null;               // mnemonic or null
   instructionId: string | null;             // ID or null
   color: string | null;
-  state: "active" | "bubble" | "flushed" | "empty";
+  state: "active" | "bubble" | "flushed" | "held" | "empty";
 }
 
 interface ResolvedForward {
@@ -239,16 +229,11 @@ interface PipelineState {
 interface CellRenderState {
   cell: ScheduledCell;                      // reference to immutable schedule cell
   opacity: number;                          // 0-1
-  pixelX: number;                           // computed from layout
-  pixelY: number;
-  pixelWidth: number;
-  pixelHeight: number;
 }
 
 interface ForwardRenderState {
   forward: ResolvedForward;                 // reference to immutable forward
   progress: number;                         // 0-1 draw-on progress
-  pathD: string;                            // SVG path data (bezier curve)
 }
 ```
 
@@ -282,7 +267,7 @@ interface ForwardRenderState {
 - **Active cell**: Rounded rect, filled with instruction color at 80% opacity, instruction mnemonic centered
 - **Bubble cell**: Rounded rect, grey (#94a3b8) with diagonal hatch pattern (reuse metastability hatch), "bubble" text
 - **Flushed cell**: Rounded rect, dashed outline (#ef4444 red), instruction text at 30% opacity
-- **Forwarded cell**: Same as active, with small arrow indicator on the left edge
+- **Held cell**: Rounded rect, instruction color at 40% fill opacity, dashed stroke (`strokeDasharray="3 2"`), instruction text at 80% opacity. Represents an instruction frozen at a pipeline stage during a stall.
 - **Empty cell**: Transparent (no rect drawn)
 
 ### Cell dimensions
@@ -387,13 +372,14 @@ Forward arrow: producer instruction color
 |------|----------|
 | Instruction with no matching hazard | Renders normally, no hazard visualization |
 | Multiple hazards on same instruction | Apply in chronological order by cycle |
-| Stall duration = 0 | Treat as no-op (no visual effect) |
-| totalCycles exceeded after stall | Clamp: last visible cycle = totalCycles - 1 |
+| Stall duration = 0 | Throw: validation rejects non-positive duration |
+| totalCycles exceeded after stall | Cell placement skips out-of-bounds cycles |
 | Empty instructions array | Render empty grid (stages × cycles, all cells empty) |
-| Forwarding with missing producer cell | Throw: "Forward producer I1 not found at EX:C4" |
-| Two instructions same cell | Throw: collision error |
-| Invalid instruction ID in hazard | Throw: "Unknown instruction ID: IX" |
+| Forwarding with missing producer cell | Throw: "Forward producer I1 not found at EX" |
+| Two instructions same cell | Throw: collision error with both instruction IDs |
+| Invalid instruction ID in hazard | Throw: "Stall references unknown instruction: IX" |
 | Hazard referencing flushed instruction | Skip: flushed instruction has no further cells |
+| Held cell overlap with active | Active cell takes precedence (held cells only fill empty slots) |
 | Multiple instructions same entryCycle | Allowed — they occupy different stages at same cycle |
 | Long mnemonic overflow | Truncate with ellipsis if text exceeds cell width |
 | >8 instructions, color reuse | Colors cycle; instruction labels (I1, I2) disambiguate |
@@ -501,10 +487,8 @@ No hazards, no forwarding. 5 instructions × 5 stages = 25 cells.
       "type": "forward",
       "producerInstruction": "I1",
       "producerStage": 3,
-      "producerCycle": 5,
       "consumerInstruction": "I3",
       "consumerStage": 2,
-      "consumerCycle": 5,
       "operand": "rs1",
       "reason": "MEM/WB → EX forwarding"
     }
@@ -564,13 +548,13 @@ I3 (SUB) and I4 (AND) are flushed — dashed outline. I5 (LW) is the branch targ
 
 ## 9. Resolved Questions
 
-| Question | Answer (v2) |
+| Question | Answer (v3) |
 |----------|-------------|
 | Primitive type | New standalone primitive (not extending DigitalTimingSpec) |
 | Grid vs waveform | Grid layout — this is structural, not temporal |
 | Cycle indexing | 1-based throughout (C1, C2, ...). Internal arrays 0-based with documented mapping. |
 | Stall semantics | Hold instruction at holdStage, insert bubble at bubbleStage, cascade shift |
-| Forwarding coordinates | Explicit producerCycle/consumerCycle required (no ambiguity after stalls) |
+| Forwarding coordinates | Auto-resolved from grid by searching (instructionId, stageIndex) — no manual cycle fields |
 | Flush semantics | Flush from resolveCycle onward for younger instructions |
 | Multiple forwards | Supported via `operand` field; vertically offset arrows |
 | Collision handling | Throw on schedule computation (fail-fast, not silent overwrite) |
