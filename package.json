@@ -9,8 +9,11 @@
     "still": "npx remotion still src/index.ts \"$npm_config_video\" \"out/$npm_config_video-frame.png\" --frame=30"
   },
   "dependencies": {
+    "@esbuild/linux-x64": "^0.28.0",
     "@remotion/cli": "^4.0.465",
+    "@remotion/compositor-linux-x64-gnu": "^4.0.468",
     "@remotion/media": "^4.0.465",
+    "@rspack/binding-linux-x64-gnu": "^2.0.4",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "remotion": "^4.0.465",

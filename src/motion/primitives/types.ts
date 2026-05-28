@@ -106,6 +106,29 @@ export interface GlitchSpec {
   color?: string;
 }
 
+export type MetastabilitySettle = "ringing" | "snap";
+
+export interface MetastabilitySpec {
+  id?: string;
+  signalPin: SignalPin;
+  /** When the setup/hold violation occurs (seconds) */
+  startTime: number;
+  /** Total visible event duration (seconds), minimum 2/fps */
+  duration: number;
+  /** What the signal settles to after resolution */
+  resolvedValue: 0 | 1;
+  /** Settling behavior — "ringing" = damped oscillation, "snap" = direct jump */
+  settleBehavior?: MetastabilitySettle;
+  /** Width of setup/hold violation window for annotation (seconds). No default — omit to skip marker. */
+  violationWindow?: number;
+  /** Post-resolution overshoot fraction (0-1, default: 0.15, deliberately exaggerated) */
+  settlingOvershoot?: number;
+  /** Number of damped oscillation cycles (default: 3) */
+  ringCount?: number;
+  /** Visual color override (default: #f97316 orange) */
+  color?: string;
+}
+
 export interface DigitalTimingSpec {
   title: string;
   fps: number;
@@ -114,5 +137,6 @@ export interface DigitalTimingSpec {
   propagations: PropagateSignalSpec[];
   latches?: LatchSpec[];
   glitches?: GlitchSpec[];
+  metastabilities?: MetastabilitySpec[];
   annotations?: TimingAnnotation[];
 }

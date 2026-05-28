@@ -1,0 +1,70 @@
+{
+  "title": "Metastability: Setup/Hold Violation",
+  "fps": 60,
+  "totalDuration": 3,
+  "signals": [
+    {
+      "name": "CLK",
+      "componentId": "flipflop",
+      "pinId": "clk",
+      "initialValue": 0,
+      "transitions": [
+        { "at": 0.50, "to": 1 },
+        { "at": 0.70, "to": 0 },
+        { "at": 1.80, "to": 1 },
+        { "at": 2.00, "to": 0 }
+      ]
+    },
+    {
+      "name": "D",
+      "componentId": "flipflop",
+      "pinId": "d",
+      "initialValue": 0,
+      "transitions": [
+        { "at": 0.49, "to": 1 },
+        { "at": 2.20, "to": 0 }
+      ]
+    },
+    {
+      "name": "Q",
+      "componentId": "flipflop",
+      "pinId": "q",
+      "initialValue": 0,
+      "transitions": [
+        { "at": 1.30, "to": 1 }
+      ]
+    }
+  ],
+  "propagations": [
+    {
+      "signalName": "CLK→Q",
+      "from": { "componentId": "flipflop", "pinId": "clk" },
+      "to": { "componentId": "flipflop", "pinId": "q" },
+      "triggerEdge": "posedge",
+      "initialState": "0",
+      "finalState": "1",
+      "delay": 0.50,
+      "duration": 0.10,
+      "timeScale": 1,
+      "emphasis": "glow-trace"
+    }
+  ],
+  "metastabilities": [
+    {
+      "id": "meta1",
+      "signalPin": { "componentId": "flipflop", "pinId": "q", "portName": "Q" },
+      "startTime": 0.50,
+      "duration": 0.80,
+      "resolvedValue": 1,
+      "settleBehavior": "ringing",
+      "ringCount": 4,
+      "violationWindow": 0.03,
+      "settlingOvershoot": 0.15,
+      "color": "#f97316"
+    }
+  ],
+  "annotations": [
+    { "at": 0.49, "text": "D changes near CLK↑ (setup violation)", "position": "top" },
+    { "at": 1.35, "text": "Q resolves to 1", "position": "bottom" }
+  ]
+}

@@ -7,6 +7,7 @@ import { ClockToQDemo } from "./digital-demo/index";
 import { FanoutDemo } from "./fanout-demo/index";
 import { LatchDemo } from "./latch-demo/index";
 import { GlitchDemo } from "./glitch-demo/index";
+import { MetastabilityDemo } from "./metastability-demo/index";
 import type { z } from "zod";
 
 type TitleOpenProps = z.infer<typeof titleOpenSchema>;
@@ -74,6 +75,14 @@ export const RemotionRoot = () => {
       <Composition
         id="GlitchDemo"
         component={GlitchDemo}
+        durationInFrames={180}
+        fps={60}
+        width={1280}
+        height={720}
+      />
+      <Composition
+        id="MetastabilityDemo"
+        component={MetastabilityDemo}
         durationInFrames={180}
         fps={60}
         width={1280}

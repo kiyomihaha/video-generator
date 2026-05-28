@@ -5,6 +5,7 @@ import { FanoutArrow } from "../components/digital/FanoutArrow";
 import { propagateSignal } from "../motion/primitives/propagateSignal";
 import { latchSignal, deriveLatchOutputSignal } from "../motion/primitives/latchSignal";
 import { glitchSignal } from "../motion/primitives/glitchSignal";
+import { metastabilitySignal } from "../motion/primitives/metastabilitySignal";
 import type { DigitalTimingSpec, TimelineSignal } from "../motion/primitives/types";
 
 interface Props { spec: DigitalTimingSpec; }
@@ -81,6 +82,10 @@ export const DigitalTimingScene: React.FC<Props> = ({ spec }) => {
           <filter id="glitch-blur" x="-20%" y="-60%" width="140%" height="220%">
             <feGaussianBlur stdDeviation={3} />
           </filter>
+          {/* Metastability hatch pattern — 45° diagonal lines, 2px stroke, 8px spacing */}
+          <pattern id="meta-hatch" width={8} height={8} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <line x1={0} y1={0} x2={0} y2={8} stroke="#f97316" strokeWidth={2} />
+          </pattern>
         </defs>
 
         <rect width={VW} height={VH} fill={S.bg} />
@@ -148,7 +153,13 @@ export const DigitalTimingScene: React.FC<Props> = ({ spec }) => {
                 );
               })()}
               {/* Snap-lock flash at latch close — easeOutCubic fade over 15 frames */}
+              {/* Suppressed when metastability is active (indeterminate or resolving) on same pin */}
               {ls && ls.state.snapLockIntensity > 0.01 && (() => {
+                const metaActive = (spec.metastabilities ?? []).some(m =>
+                  m.signalPin.pinId === ls.latch.outputPin.pinId &&
+                  (() => { const s = metastabilitySignal(m, f, fps); return s.active && (s.phase === "indeterminate" || s.phase === "resolving"); })()
+                );
+                if (metaActive) return null;
                 const closeTime = findLastCloseTime(ls.enableSig, ls.latch.latchMode, f, fps);
                 const cx = (closeTime / end) * CW;
                 const si = ls.state.snapLockIntensity;
@@ -206,6 +217,149 @@ export const DigitalTimingScene: React.FC<Props> = ({ spec }) => {
                     {/* Crisp stroke */}
                     <path d={d} fill="none" stroke={color} strokeWidth={2.5}
                       opacity={0.9 * gs.amplitude} strokeLinejoin="round" strokeLinecap="round" />
+                  </g>
+                );
+              })}
+              {/* Metastability overlay */}
+              {(spec.metastabilities ?? []).map((meta, origIdx) => {
+                if (meta.signalPin.pinId !== sig.pinId) return null;
+                const ms = metastabilitySignal(meta, f, fps);
+                if (!ms.active) return null;
+                const color = meta.color ?? "#f97316";
+                const yHigh = TH * 0.25;
+                const yLow = TH * 0.75;
+                const yMid = TH * 0.5;
+                const metaId = `meta-hatch-${meta.id ?? "m"}-${sig.pinId}-${origIdx}`;
+                const isSnap = meta.settleBehavior === "snap";
+
+                // Crossfade: fps-derived frames at 60% of indeterminate boundary (0.48)
+                const crossfadeFrames = Math.max(1, Math.round(fps * 0.2));
+                const crossfadeStartFrame = meta.startTime * fps + (meta.duration * fps) * 0.48;
+                const fadeProg = Math.max(0, Math.min(1, (f - crossfadeStartFrame) / crossfadeFrames));
+                const hatchOpacity = (1 - fadeProg) * 0.20;
+                const ringFadeIn = fadeProg;
+
+                const bandSwing = (yLow - yHigh) * ms.bandWidth;
+                const bandTop = yMid - bandSwing / 2;
+                const bandBottom = yMid + bandSwing / 2;
+
+                // Ringing waveform path — ringing only during resolving (0.80-0.95), flat mid-rail during indeterminate
+                const ringFreq = meta.ringCount ?? 3;
+                const wavePoints: string[] = [];
+                const waveSteps = Math.max(1, Math.round((meta.duration / end) * CW * 0.8));
+                const indeterminateFrac = 0.80;
+                const resolvingFrac = 0.95;
+                for (let wi = 0; wi <= waveSteps; wi++) {
+                  const wx = (meta.startTime / end) * CW + (wi / waveSteps) * ((meta.duration / end) * CW);
+                  const wt = wi / waveSteps;
+                  let wy: number;
+                  if (wt < indeterminateFrac) {
+                    // Indeterminate: flat at mid-rail
+                    wy = yMid;
+                  } else if (wt < resolvingFrac) {
+                    // Resolving: damped sinusoid converging to resolved rail
+                    const resolveProg = (wt - indeterminateFrac) / (resolvingFrac - indeterminateFrac);
+                    const wPhase = wt * ringFreq * Math.PI * 2;
+                    const wAmplitude = Math.exp(-3 * wt) * (yLow - yHigh) * 0.5;
+                    const wSettle = (ms.resolvedValue - 0.5) * (yLow - yHigh) * resolveProg;
+                    wy = yMid + Math.sin(wPhase) * wAmplitude * (1 - resolveProg) + wSettle;
+                  } else {
+                    // Settled/overshoot: at resolved rail
+                    wy = ms.resolvedValue === 1 ? yHigh : yLow;
+                  }
+                  wavePoints.push(`${wi === 0 ? "M" : "L"} ${wx.toFixed(1)} ${wy.toFixed(1)}`);
+                }
+
+                // Overshoot
+                const overshootAmt = (meta.settlingOvershoot ?? 0.15) * (yLow - yHigh);
+
+                return (
+                  <g key={`met-${sig.pinId}-${origIdx}`}>
+                    <defs>
+                      <pattern id={metaId} width={8} height={8} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                        <line x1={0} y1={0} x2={0} y2={8} stroke={color} strokeWidth={2} />
+                      </pattern>
+                      <clipPath id={`meta-clip-${metaId}`}>
+                        <rect x={0} y={0} width={CW} height={TH} />
+                      </clipPath>
+                    </defs>
+
+                    {/* Layer 1: Hatched indeterminate band */}
+                    {hatchOpacity > 0.001 && (
+                      <rect
+                        x={(meta.startTime / end) * CW}
+                        y={bandTop}
+                        width={(meta.duration / end) * CW}
+                        height={bandBottom - bandTop}
+                        fill={`url(#${metaId})`}
+                        opacity={hatchOpacity}
+                        clipPath={`url(#meta-clip-${metaId})`}
+                      />
+                    )}
+
+                    {/* Layer 2: Damped ringing waveform (skipped for snap behavior) */}
+                    {!isSnap && ringFadeIn > 0.001 && ms.phase !== "settled" && (
+                      <path
+                        d={wavePoints.join(" ")}
+                        fill="none"
+                        stroke={color}
+                        strokeWidth={2.5}
+                        opacity={0.9 * ringFadeIn * Math.max(0.05, ms.ringAmplitude)}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        clipPath={`url(#meta-clip-${metaId})`}
+                      />
+                    )}
+                    {/* Layer 2b: Snap ramp line (only for snap behavior) */}
+                    {isSnap && ms.phase === "resolving" && (() => {
+                      const startX = ((meta.startTime + meta.duration * indeterminateFrac) / end) * CW;
+                      const endX = ((meta.startTime + meta.duration * 0.95) / end) * CW;
+                      const fromY = yMid;
+                      const toY = ms.resolvedValue === 1 ? yHigh : yLow;
+                      return <line x1={startX} y1={fromY} x2={endX} y2={toY} stroke={color} strokeWidth={2.5} opacity={0.9} />;
+                    })()}
+
+                    {/* Layer 3: Post-resolution overshoot */}
+                    {ms.phase === "settled" && ms.overshootProgress > 0.01 && (() => {
+                      const overshootPeak = ms.resolvedValue === 1
+                        ? yHigh - overshootAmt * ms.overshootProgress
+                        : yLow + overshootAmt * ms.overshootProgress;
+                      const settleX = (meta.startTime / end) * CW + ((meta.duration / end) * CW) * 0.95;
+                      const overshootLen = ((meta.duration / end) * CW) * 0.05;
+                      const d = `M ${settleX} ${ms.resolvedValue === 1 ? yHigh : yLow} Q ${settleX + overshootLen * 0.5} ${overshootPeak} ${settleX + overshootLen} ${ms.resolvedValue === 1 ? yHigh : yLow}`;
+                      return <path d={d} fill="none" stroke={color} strokeWidth={2} opacity={0.7 * ms.overshootProgress} />;
+                    })()}
+
+                    {/* Layer 4: Resolution annotation (after duration, mid-rail) */}
+                    {f >= (meta.startTime + meta.duration) * fps && (() => {
+                      const mx = ((meta.startTime + meta.duration) / end) * CW;
+                      const bw = 72;
+                      return (
+                        <>
+                          <rect x={mx - bw / 2} y={yMid - 12} width={bw} height={20} rx={4} fill={color} opacity={0.10} />
+                          <text x={mx} y={yMid + 3} fill={color} fontSize={12} fontWeight={700} fontFamily="Inter, sans-serif" textAnchor="middle">
+                            t_res {((meta.duration) * 1000).toFixed(0)}ms
+                          </text>
+                        </>
+                      );
+                    })()}
+
+                    {/* Layer 5: Violation window marker (first few frames) */}
+                    {meta.violationWindow !== undefined && ms.progress < 0.1 && (() => {
+                      const vx = (meta.startTime / end) * CW;
+                      const vw = (meta.violationWindow / end) * CW;
+                      return (
+                        <rect
+                          x={vx - vw / 2}
+                          y={yMid - 8}
+                          width={vw}
+                          height={16}
+                          fill={color}
+                          opacity={0.5 * (1 - ms.progress / 0.1)}
+                          rx={2}
+                        />
+                      );
+                    })()}
                   </g>
                 );
               })}
