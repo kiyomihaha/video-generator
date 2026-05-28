@@ -8,6 +8,7 @@ import { FanoutDemo } from "./fanout-demo/index";
 import { LatchDemo } from "./latch-demo/index";
 import { GlitchDemo } from "./glitch-demo/index";
 import { MetastabilityDemo } from "./metastability-demo/index";
+import { PipelineDemo } from "./pipeline-demo/index";
 import type { z } from "zod";
 
 type TitleOpenProps = z.infer<typeof titleOpenSchema>;
@@ -84,6 +85,14 @@ export const RemotionRoot = () => {
         id="MetastabilityDemo"
         component={MetastabilityDemo}
         durationInFrames={180}
+        fps={60}
+        width={1280}
+        height={720}
+      />
+      <Composition
+        id="PipelineDemo"
+        component={PipelineDemo}
+        durationInFrames={480}
         fps={60}
         width={1280}
         height={720}
