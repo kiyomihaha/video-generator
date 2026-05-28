@@ -2,6 +2,7 @@ node_modules/
 out/
 dist/
 .gstack/
+.omc/
 
 # Large model files
 tools/
@@ -17,3 +18,9 @@ public/*.mp3
 
 # Screenshots
 实测图片/
+public/review-screenshots/
+
+# Temp files
+*.cjs
+nul
+.understand-anything/
