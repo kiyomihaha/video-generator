@@ -5,6 +5,7 @@ import React, { useMemo } from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import { computePipelineSchedule } from "../motion/pipeline/pipelineSchedule";
 import { pipelineState } from "../motion/pipeline/pipelineState";
+import { THEME } from "../theme";
 import type { PipelineSpec, ScheduledCell } from "../motion/pipeline/types";
 
 interface Props {
@@ -18,16 +19,9 @@ const HEADER_H = 36;
 const CELL_PAD = 4;
 const BORDER_R = 4;
 
-const S = {
-  bg: "#08111f",
-  panel: "#1e293b",
-  grid: "#334155",
-  text: "#f8fafc",
-  bright: "#e2e8f0",
-  muted: "#64748b",
-  bubble: "#94a3b8",
-  flush: "#ef4444",
-};
+const S = THEME.canvas;
+const T = THEME.text;
+const P = THEME.pipeline;
 
 export const PipelineScene: React.FC<Props> = ({ spec }) => {
   const f = useCurrentFrame();
@@ -71,7 +65,7 @@ export const PipelineScene: React.FC<Props> = ({ spec }) => {
               y1={0}
               x2={0}
               y2={8}
-              stroke={S.bubble}
+              stroke={P.bubble}
               strokeWidth={2}
             />
           </pattern>
@@ -85,7 +79,7 @@ export const PipelineScene: React.FC<Props> = ({ spec }) => {
             markerHeight="8"
             orient="auto-start-reverse"
           >
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="#38b8db" />
+            <path d="M 0 0 L 10 5 L 0 10 z" fill={P.marker} />
           </marker>
         </defs>
 
@@ -96,7 +90,7 @@ export const PipelineScene: React.FC<Props> = ({ spec }) => {
           <text
             x={VW / 2}
             y={24}
-            fill={S.text}
+            fill={T.primary}
             fontSize={20}
             fontFamily="Inter, sans-serif"
             fontWeight={700}
@@ -114,7 +108,7 @@ export const PipelineScene: React.FC<Props> = ({ spec }) => {
               key={`ch-${ci}`}
               x={x}
               y={gridY - 8}
-              fill={S.bright}
+              fill={T.bright}
               fontSize={13}
               fontFamily="Inter, monospace"
               fontWeight={600}
@@ -133,7 +127,7 @@ export const PipelineScene: React.FC<Props> = ({ spec }) => {
               key={`sl-${si}`}
               x={STAGE_LABEL_W - 10}
               y={y + 5}
-              fill={S.bright}
+              fill={T.bright}
               fontSize={15}
               fontFamily="Inter, monospace"
               fontWeight={700}
@@ -294,7 +288,7 @@ const Cell: React.FC<{
           width={w}
           height={h}
           fill="none"
-          stroke={S.bubble}
+          stroke={P.bubble}
           strokeWidth={1}
           rx={BORDER_R}
           opacity={0.4}
@@ -302,7 +296,7 @@ const Cell: React.FC<{
         <text
           x={x + w / 2}
           y={y + h / 2 + 4}
-          fill={S.bubble}
+          fill={P.bubble}
           fontSize={11}
           fontFamily="Inter, monospace"
           textAnchor="middle"
@@ -322,7 +316,7 @@ const Cell: React.FC<{
           y={y}
           width={w}
           height={h}
-          fill={cell.color ?? "#3b82f6"}
+          fill={cell.color ?? P.cell}
           fillOpacity={0.4}
           rx={BORDER_R}
         />
@@ -332,7 +326,7 @@ const Cell: React.FC<{
           width={w}
           height={h}
           fill="none"
-          stroke={cell.color ?? "#3b82f6"}
+          stroke={cell.color ?? P.cell}
           strokeWidth={1.5}
           strokeDasharray="3 2"
           rx={BORDER_R}
@@ -342,7 +336,7 @@ const Cell: React.FC<{
           <text
             x={x + w / 2}
             y={y + h / 2 + 4}
-            fill={cell.color ?? "#3b82f6"}
+            fill={cell.color ?? P.cell}
             fontSize={11}
             fontFamily="Inter, monospace"
             fontWeight={600}
@@ -364,7 +358,7 @@ const Cell: React.FC<{
           y={y}
           width={w}
           height={h}
-          fill={cell.color ?? S.flush}
+          fill={cell.color ?? P.flush}
           fillOpacity={0.1}
           rx={BORDER_R}
         />
@@ -374,7 +368,7 @@ const Cell: React.FC<{
           width={w}
           height={h}
           fill="none"
-          stroke={S.flush}
+          stroke={P.flush}
           strokeWidth={1.5}
           strokeDasharray="4 3"
           rx={BORDER_R}
@@ -384,7 +378,7 @@ const Cell: React.FC<{
           <text
             x={x + w / 2}
             y={y + h / 2 + 4}
-            fill={cell.color ?? S.flush}
+            fill={cell.color ?? P.flush}
             fontSize={11}
             fontFamily="Inter, monospace"
             textAnchor="middle"
@@ -405,7 +399,7 @@ const Cell: React.FC<{
         y={y}
         width={w}
         height={h}
-        fill={cell.color ?? "#3b82f6"}
+        fill={cell.color ?? P.cell}
         fillOpacity={0.8}
         rx={BORDER_R}
       />

@@ -31,7 +31,7 @@ export interface CacheAccess {
   id: string;                              // unique ID (e.g. "A1")
   address: number;                         // raw byte address, non-negative, aligned to blockSize
   type: AccessType;
-  cycle: number;                           // 1-based, unique across all accesses
+  cycle: number;                           // 1-based contiguous ordering (must be 1,2,3,...,N)
   label?: string;                          // display text (e.g. "LW R1, 0(R2)")
 }
 
@@ -63,9 +63,10 @@ export interface TimelineEntry {
   result: "hit" | "cold-miss" | "conflict-miss" | "capacity-miss";
   hitWay: number | null;                   // way index if hit
   victimWay: number | null;                // way chosen for eviction (on miss)
-  fillWay: number;                         // way where new line is placed
+  fillWay: number | null;                  // way where new line is placed (null for no-write-allocate)
   evictedBlock: number | null;             // evicted block address
   evictedDirty: boolean;
+  filled: boolean;                         // true only if way was allocated from memory (miss + fill)
   dirtyAfter: boolean;                     // dirty bit state after this access
 }
 
@@ -74,7 +75,7 @@ export interface CacheSchedule {
   bitFields: BitFieldInfo;
   numSets: number;
   associativity: number;
-  totalCycles: number;
+  totalCycles: number;                     // number of accesses (timeline.length), used for animation duration
 }
 
 // ─── Per-frame render state ───
@@ -91,7 +92,9 @@ export interface CellState {
   dirty: boolean;
   opacity: number;                         // 0-1
   highlight: number;                       // 0-1 pulse on hit
+  compareHighlight: number;                // 0-1 flash during miss compare (blue, not green)
   evictionFlash: number;                   // 0-1 flash on eviction
+  ageRank: number;                         // 0=MRU in set, N-1=LRU; -1 if invalid
 }
 
 export interface AccessState {

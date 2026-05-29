@@ -1,0 +1,29 @@
+{
+  "id": "cache-demo",
+  "title": "4-Way Set-Associative Cache — Cold / Hit / Conflict Miss",
+  "numSets": 4,
+  "associativity": 4,
+  "blockSize": 16,
+  "addressBits": 10,
+  "replacement": "LRU",
+  "writeHitPolicy": "write-back",
+  "writeMissPolicy": "write-allocate",
+  "clockPeriod": 1.0,
+  "hitColor": "#10b981",
+  "missColor": "#ef4444",
+  "evictionColor": "#f59e0b",
+  "accesses": [
+    { "id": "A1",  "address": 0,   "type": "read",  "cycle": 1,  "label": "LW R1, 0(R0)" },
+    { "id": "A2",  "address": 64,  "type": "read",  "cycle": 2,  "label": "LW R2, 64(R0)" },
+    { "id": "A3",  "address": 128, "type": "read",  "cycle": 3,  "label": "LW R3, 128(R0)" },
+    { "id": "A4",  "address": 192, "type": "read",  "cycle": 4,  "label": "LW R4, 192(R0)" },
+    { "id": "A5",  "address": 0,   "type": "read",  "cycle": 5,  "label": "LW R5, 0(R0)" },
+    { "id": "A6",  "address": 256, "type": "read",  "cycle": 6,  "label": "LW R6, 256(R0)" },
+    { "id": "A7",  "address": 320, "type": "read",  "cycle": 7,  "label": "LW R7, 320(R0)" },
+    { "id": "A8",  "address": 0,   "type": "write", "cycle": 8,  "label": "SW R8, 0(R0)" },
+    { "id": "A9",  "address": 384, "type": "read",  "cycle": 9,  "label": "LW R9, 384(R0)" },
+    { "id": "A10", "address": 448, "type": "read",  "cycle": 10, "label": "LW R10, 448(R0)" },
+    { "id": "A11", "address": 64,  "type": "read",  "cycle": 11, "label": "LW R2, 64(R0)" },
+    { "id": "A12", "address": 128, "type": "read",  "cycle": 12, "label": "LW R3, 128(R0)" }
+  ]
+}

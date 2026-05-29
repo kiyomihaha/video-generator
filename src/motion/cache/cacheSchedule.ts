@@ -8,7 +8,6 @@
 import type {
   CacheSpec,
   CacheSchedule,
-  CacheAccess,
   BitFieldInfo,
   TimelineEntry,
 } from "./types";
@@ -30,7 +29,7 @@ interface SetState {
 // ── Helpers ───────────────────────────────────────────────────────
 
 function isPowerOf2(n: number): boolean {
-  return n > 0 && (n & (n - 1)) === 0;
+  return Number.isInteger(n) && n > 0 && Math.log2(n) % 1 === 0;
 }
 
 function log2(n: number): number {
@@ -49,9 +48,13 @@ function seededHash(...args: number[]): number {
 
 // ── Shadow fully-associative cache ────────────────────────────────
 
+// Shadow fully-associative cache for miss classification.
+// NOTE: Always uses LRU eviction regardless of the real cache's replacement
+// policy. This is intentional — the FA cache classifies misses as
+// cold/conflict/capacity, and LRU is the standard baseline for that analysis.
 interface ShadowFA {
   capacity: number;
-  blocks: Map<number, { lastAccess: number; loadCycle: number }>;
+  blocks: Map<number, { lastAccess: number }>;
   everSeen: Set<number>;
 }
 
@@ -63,7 +66,13 @@ function shadowFAAccess(
   fa: ShadowFA,
   blockAddress: number,
   cycle: number,
+  shouldAllocate: boolean,
 ): { seen: boolean; wouldHit: boolean } {
+  // everSeen tracks "first reference in the access trace" regardless of
+  // allocation policy. This means a no-write-allocate write miss counts
+  // as seen, so a later read miss to the same block is classified as
+  // conflict/capacity (not cold). This is intentional: cold = never
+  // referenced before in the trace, not "never allocated."
   const seen = fa.everSeen.has(blockAddress);
   fa.everSeen.add(blockAddress);
 
@@ -73,21 +82,23 @@ function shadowFAAccess(
     return { seen, wouldHit: true };
   }
 
-  // Miss in FA
-  if (fa.blocks.size >= fa.capacity) {
-    // Evict LRU
-    let lruBlock = -1;
-    let lruCycle = Infinity;
-    for (const [block, state] of fa.blocks) {
-      if (state.lastAccess < lruCycle) {
-        lruCycle = state.lastAccess;
-        lruBlock = block;
+  // Miss in FA — only allocate if the real cache would
+  if (shouldAllocate) {
+    if (fa.blocks.size >= fa.capacity) {
+      // Evict LRU
+      let lruBlock = -1;
+      let lruCycle = Infinity;
+      for (const [block, state] of fa.blocks) {
+        if (state.lastAccess < lruCycle) {
+          lruCycle = state.lastAccess;
+          lruBlock = block;
+        }
       }
+      if (lruBlock >= 0) fa.blocks.delete(lruBlock);
     }
-    if (lruBlock >= 0) fa.blocks.delete(lruBlock);
+    fa.blocks.set(blockAddress, { lastAccess: cycle });
   }
 
-  fa.blocks.set(blockAddress, { lastAccess: cycle, loadCycle: cycle });
   return { seen, wouldHit: false };
 }
 
@@ -102,8 +113,35 @@ export function computeCacheSchedule(spec: CacheSpec): CacheSchedule {
   if (numSets < 1) throw new Error("numSets must be >= 1");
   if (!isPowerOf2(blockSize)) throw new Error(`blockSize must be power of 2, got ${blockSize}`);
   if (blockSize < 1) throw new Error("blockSize must be >= 1");
-  if (associativity < 1) throw new Error("associativity must be >= 1");
-  if (addressBits < 1) throw new Error("addressBits must be >= 1");
+  if (!Number.isInteger(associativity) || associativity < 1) {
+    throw new Error(`associativity must be integer >= 1, got ${associativity}`);
+  }
+  if (!Number.isInteger(addressBits) || addressBits < 1 || addressBits > 52) {
+    throw new Error(`addressBits must be integer between 1 and 52, got ${addressBits}`);
+  }
+  if (!Array.isArray(accesses) || accesses.length < 1) {
+    throw new Error("accesses must be a non-empty array");
+  }
+  if (!Number.isFinite(spec.clockPeriod) || spec.clockPeriod <= 0) {
+    throw new Error(`clockPeriod must be a positive number, got ${spec.clockPeriod}`);
+  }
+  if (!["LRU", "FIFO", "random"].includes(spec.replacement)) {
+    throw new Error(`replacement must be LRU|FIFO|random, got "${spec.replacement}"`);
+  }
+  if (!["write-back", "write-through"].includes(spec.writeHitPolicy)) {
+    throw new Error(`writeHitPolicy must be write-back|write-through, got "${spec.writeHitPolicy}"`);
+  }
+  if (!["write-allocate", "no-write-allocate"].includes(spec.writeMissPolicy)) {
+    throw new Error(`writeMissPolicy must be write-allocate|no-write-allocate, got "${spec.writeMissPolicy}"`);
+  }
+  if (spec.seed !== undefined && !Number.isFinite(spec.seed)) {
+    throw new Error(`seed must be a finite number, got ${spec.seed}`);
+  }
+  if (numSets > 16) throw new Error(`numSets too large for visualization (max 16, got ${numSets})`);
+  if (associativity > 16) throw new Error(`associativity too large for visualization (max 16, got ${associativity})`);
+  if (accesses.length > 32) {
+    throw new Error(`too many accesses for visualization (max 32, got ${accesses.length})`);
+  }
 
   const offsetBits = log2(blockSize);
   const indexBits = log2(numSets);
@@ -116,19 +154,21 @@ export function computeCacheSchedule(spec: CacheSpec): CacheSchedule {
   const maxAddress = Math.pow(2, addressBits);
 
   const seenIds = new Set<string>();
-  const seenCycles = new Set<number>();
 
-  for (const acc of accesses) {
-    if (!acc.id) throw new Error("Each access must have an id");
+  for (let i = 0; i < accesses.length; i++) {
+    const acc = accesses[i];
+    if (acc === null || typeof acc !== "object") {
+      throw new Error(`accesses[${i}] must be an object`);
+    }
+    if (typeof acc.id !== "string" || acc.id.trim() === "") {
+      throw new Error(`accesses[${i}] must have a non-empty string id`);
+    }
     if (seenIds.has(acc.id)) throw new Error(`Duplicate access id: ${acc.id}`);
     seenIds.add(acc.id);
-    if (!Number.isInteger(acc.cycle) || acc.cycle < 1) {
-      throw new Error(`Access "${acc.id}" cycle must be >= 1, got ${acc.cycle}`);
+    // Cycles must be contiguous 1,2,3,...,N to match dense animation timing
+    if (!Number.isInteger(acc.cycle) || acc.cycle !== i + 1) {
+      throw new Error(`Access "${acc.id}" cycle must be ${i + 1} (contiguous 1-based), got ${acc.cycle}`);
     }
-    if (seenCycles.has(acc.cycle)) {
-      throw new Error(`Duplicate cycle ${acc.cycle} (access "${acc.id}") — unique cycles required`);
-    }
-    seenCycles.add(acc.cycle);
     if (!Number.isInteger(acc.address) || acc.address < 0) {
       throw new Error(`Access "${acc.id}" address must be non-negative integer, got ${acc.address}`);
     }
@@ -139,6 +179,9 @@ export function computeCacheSchedule(spec: CacheSpec): CacheSchedule {
       throw new Error(
         `Access "${acc.id}" address ${acc.address} not aligned to blockSize ${blockSize}`,
       );
+    }
+    if (typeof acc.type !== "string" || !["read", "write"].includes(acc.type)) {
+      throw new Error(`Access "${acc.id}" type must be read|write, got "${acc.type}"`);
     }
   }
 
@@ -188,21 +231,16 @@ export function computeCacheSchedule(spec: CacheSpec): CacheSchedule {
       }
     }
 
-    // Shadow FA result for miss classification
-    const faResult = shadowFAAccess(shadowFA, blockAddress, acc.cycle);
-
     let result: TimelineEntry["result"];
     let victimWay: number | null = null;
-    let fillWay: number;
+    let fillWay: number | null = null;
     let evictedBlock: number | null = null;
     let evictedDirty = false;
 
     if (hitWay !== null) {
       // ── Hit ──
       result = "hit";
-      fillWay = hitWay;
-
-      // Update access tracking
+      // fillWay stays null for hits (no new line placed)
       set.ways[hitWay].lastAccessCycle = acc.cycle;
 
       // Write hit: mark dirty if write-back
@@ -210,8 +248,19 @@ export function computeCacheSchedule(spec: CacheSpec): CacheSchedule {
         set.ways[hitWay].dirty = true;
       }
       // Write-through: dirty stays false
+
+      // Shadow FA: hit updates recency regardless of shouldAllocate.
+      // If FA would miss, allocation follows the same access-type/write-miss policy.
+      const hitAllocate = acc.type === "read" || spec.writeMissPolicy === "write-allocate";
+      shadowFAAccess(shadowFA, blockAddress, acc.cycle, hitAllocate);
     } else {
       // ── Miss ──
+
+      // Write miss policy: no-write-allocate skips fill entirely
+      const shouldFill = acc.type === "read" || spec.writeMissPolicy === "write-allocate";
+
+      // Shadow FA: only allocate if real cache would fill
+      const faResult = shadowFAAccess(shadowFA, blockAddress, acc.cycle, shouldFill);
 
       // Classify miss
       if (!faResult.seen) {
@@ -222,30 +271,26 @@ export function computeCacheSchedule(spec: CacheSpec): CacheSchedule {
         result = "capacity-miss";
       }
 
-      // Check for an invalid way first (no eviction needed)
-      let invalidWay: number | null = null;
-      for (let w = 0; w < associativity; w++) {
-        if (!set.ways[w].valid) {
-          invalidWay = w;
-          break;
-        }
-      }
-
-      if (invalidWay !== null) {
-        // Use invalid way — no eviction
-        fillWay = invalidWay;
-      } else {
-        // All ways valid — must evict
-        victimWay = selectVictim(set, spec, blockAddress, index);
-        evictedBlock = set.ways[victimWay].tag * numSets + index; // reconstruct block addr
-        evictedDirty = set.ways[victimWay].dirty;
-        fillWay = victimWay;
-      }
-
-      // Write miss policy
-      const shouldFill = acc.type === "read" || spec.writeMissPolicy === "write-allocate";
-
       if (shouldFill) {
+        // Check for an invalid way first (no eviction needed)
+        let invalidWay: number | null = null;
+        for (let w = 0; w < associativity; w++) {
+          if (!set.ways[w].valid) {
+            invalidWay = w;
+            break;
+          }
+        }
+
+        if (invalidWay !== null) {
+          fillWay = invalidWay;
+        } else {
+          // All ways valid — must evict
+          victimWay = selectVictim(set, spec, blockAddress, index, acc.cycle);
+          evictedBlock = set.ways[victimWay].tag * numSets + index;
+          evictedDirty = set.ways[victimWay].dirty;
+          fillWay = victimWay;
+        }
+
         // Fill the way
         set.ways[fillWay].valid = true;
         set.ways[fillWay].tag = tag;
@@ -253,8 +298,12 @@ export function computeCacheSchedule(spec: CacheSpec): CacheSchedule {
         set.ways[fillWay].lastAccessCycle = acc.cycle;
         set.ways[fillWay].loadCycle = acc.cycle;
       }
-      // no-write-allocate + write: don't fill, just write-through
+      // no-write-allocate + write miss: no fill, no eviction; write is forwarded to lower memory
     }
+
+    const filled = fillWay !== null && hitWay === null;
+    const affectedWay = hitWay ?? fillWay;
+    const dirtyAfter = affectedWay !== null ? set.ways[affectedWay].dirty : false;
 
     timeline.push({
       accessId: acc.id,
@@ -270,15 +319,14 @@ export function computeCacheSchedule(spec: CacheSpec): CacheSchedule {
       fillWay,
       evictedBlock,
       evictedDirty,
-      dirtyAfter: set.ways[fillWay].dirty,
+      filled,
+      dirtyAfter,
     });
   }
 
   // ── Step 4: Return ────────────────────────────────────────────
 
-  const totalCycles = sorted.length > 0
-    ? sorted[sorted.length - 1].cycle
-    : 0;
+  const totalCycles = timeline.length;
 
   return {
     timeline,
@@ -296,6 +344,7 @@ function selectVictim(
   spec: CacheSpec,
   blockAddress: number,
   index: number,
+  cycle: number,
 ): number {
   const { replacement, seed } = spec;
 
@@ -325,8 +374,11 @@ function selectVictim(
     }
 
     case "random": {
-      const hash = seededHash(blockAddress, index, seed ?? 0);
+      const hash = seededHash(blockAddress, index, cycle, seed ?? 0);
       return Math.floor(hash * set.ways.length);
     }
+
+    default:
+      return 0; // unreachable — validated upstream
   }
 }

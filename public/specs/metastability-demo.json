@@ -40,6 +40,7 @@
       "signalName": "CLK→Q",
       "from": { "componentId": "flipflop", "pinId": "clk" },
       "to": { "componentId": "flipflop", "pinId": "q" },
+      "timelineId": "main",
       "triggerEdge": "posedge",
       "initialState": "0",
       "finalState": "1",

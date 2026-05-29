@@ -6,6 +6,7 @@ import { propagateSignal } from "../motion/primitives/propagateSignal";
 import { latchSignal, deriveLatchOutputSignal } from "../motion/primitives/latchSignal";
 import { glitchSignal } from "../motion/primitives/glitchSignal";
 import { metastabilitySignal } from "../motion/primitives/metastabilitySignal";
+import { THEME } from "../theme";
 import type { DigitalTimingSpec, TimelineSignal } from "../motion/primitives/types";
 
 interface Props { spec: DigitalTimingSpec; }
@@ -15,15 +16,12 @@ const CL = 150, CR = 80, CT = 116, TH = 112, TG = 42;
 const CW = VW - CL - CR;
 const AT = (n: number) => CT + n * TH + (n - 1) * TG + 34;
 
-const S = {
-  bg: "#08111f", panel: "#1e293b", grid: "#334155",
-  text: "#f8fafc", bright: "#e2e8f0", muted: "#64748b",
-  clock: "#60a5fa", data: "#facc15", output: "#4ade80", arrow: "#38bdf8", delay: "#f472b6",
-  glitch: "#ef4444",
-};
+const S = THEME.canvas;
+const T = THEME.text;
+const D = THEME.digital;
 
 const sigColor = (pid: string) =>
-  pid === "clk" ? S.clock : pid === "d" ? S.data : pid === "q" ? S.output : S.muted;
+  pid === "clk" ? D.clock : pid === "d" ? D.data : pid === "q" ? D.output : T.muted;
 
 /** Find the first transition time of a signal that occurs after startTime */
 const firstTransitionAfter = (signals: TimelineSignal[], pinId: string, startTime: number) => {
@@ -89,7 +87,7 @@ export const DigitalTimingScene: React.FC<Props> = ({ spec }) => {
         </defs>
 
         <rect width={VW} height={VH} fill={S.bg} />
-        <text x={60} y={50} fill={S.text} fontSize={28} fontFamily="Inter, sans-serif" fontWeight={800}>{spec.title}</text>
+        <text x={60} y={50} fill={T.primary} fontSize={28} fontFamily="Inter, sans-serif" fontWeight={800}>{spec.title}</text>
         <line x1={CL} y1={90} x2={CL + CW} y2={90} stroke={S.grid} strokeWidth={1} />
 
         {/* Time axis */}
@@ -97,7 +95,7 @@ export const DigitalTimingScene: React.FC<Props> = ({ spec }) => {
           const x = sx(i);
           return (
             <g key={`a${i}`}>
-              <text x={x} y={80} fill={S.bright} fontSize={12} textAnchor="middle">{i}&thinsp;s</text>
+              <text x={x} y={80} fill={T.bright} fontSize={12} textAnchor="middle">{i}&thinsp;s</text>
               <rect x={x - 0.5} y={CT} width={1} height={an + 130 - CT} fill="#ffffff08" />
             </g>
           );
@@ -112,7 +110,7 @@ export const DigitalTimingScene: React.FC<Props> = ({ spec }) => {
           const ls = latchStates.find(ls => ls?.latch.outputPin.pinId === sig.pinId);
           return (
             <g key={sig.pinId} transform={`translate(${CL}, ${ty(i)})`}>
-              <rect x={-106} y={0} width={CW + 106} height={TH} rx={6} fill={i % 2 === 0 ? "#0a1428" : "#0c1830"} />
+              <rect x={-106} y={0} width={CW + 106} height={TH} rx={6} fill={i % 2 === 0 ? S.altRowA : S.altRowB} />
               <SignalWave signal={effSig} timeScale={end} canvasWidth={CW} canvasHeight={TH}
                 glowIntensity={p?.from.pinId === sig.pinId ? a?.sourceGlow ?? 0 : (ls?.state.glowIntensity ?? 0)}
                 pulseIntensity={p?.to.pinId === sig.pinId ? a?.targetPulse ?? 0 : (ls?.state.latchIntensity ?? 0)}
@@ -143,7 +141,7 @@ export const DigitalTimingScene: React.FC<Props> = ({ spec }) => {
               {ls && (() => {
                 const barColor = ls.state.enableActive
                   ? (ls.latch.visual?.glowColor ?? "#c084fc")
-                  : "#64748b";
+                  : T.muted;
                 const barOpacity = ls.state.enableActive ? 0.8 : 0.3;
                 return (
                   <>
@@ -191,7 +189,7 @@ export const DigitalTimingScene: React.FC<Props> = ({ spec }) => {
                 if (!gs.active || gs.amplitude < 0.01) return null;
                 const gx = (glitch.startTime / end) * CW;
                 const gw = (glitch.duration / end) * CW;
-                const color = glitch.color ?? "#ef4444";
+                const color = glitch.color ?? D.glitch;
                 // Build jagged glitch path: rectangular pulse with jitter
                 // Align to SignalWave rails: high = TH*0.25, low = TH*0.75
                 const yHigh = TH * 0.25;
@@ -389,7 +387,7 @@ export const DigitalTimingScene: React.FC<Props> = ({ spec }) => {
               {/* Causal arrow — skip if fanout handles it */}
               <g opacity={Math.max(0.12, aState.progress)}>
                 {(p.fanoutEdges?.length ?? 0) === 0 && (<>
-                  <line x1={clkX} y1={clkY} x2={qX} y2={qTransitY} stroke={S.arrow} strokeWidth={4}
+                  <line x1={clkX} y1={clkY} x2={qX} y2={qTransitY} stroke={D.arrow} strokeWidth={4}
                     strokeDasharray={aState.arrowLength} strokeDashoffset={aState.arrowOffset}
                     strokeLinecap="round" />
                   {(aState.progress > 0.3) && (() => {
@@ -402,7 +400,7 @@ export const DigitalTimingScene: React.FC<Props> = ({ spec }) => {
                           `${qX - hs * Math.cos(angle - 0.35)},${qTransitY - hs * Math.sin(angle - 0.35)}`,
                           `${qX - hs * Math.cos(angle + 0.35)},${qTransitY - hs * Math.sin(angle + 0.35)}`,
                         ].join(" ")}
-                        fill={S.arrow}
+                        fill={D.arrow}
                       />
                     );
                   })()}
@@ -410,17 +408,17 @@ export const DigitalTimingScene: React.FC<Props> = ({ spec }) => {
               </g>
 
               {/* Vertical ref lines */}
-              <line x1={clkX} y1={ty(fi) + 18} x2={clkX} y2={an + 72} stroke={S.muted} strokeWidth={1} strokeDasharray="4 6" opacity={0.5} />
-              {!p.fanoutEdges && <line x1={qX} y1={ty(ti) + 18} x2={qX} y2={an + 72} stroke={S.muted} strokeWidth={1} strokeDasharray="4 6" opacity={0.5} />}
+              <line x1={clkX} y1={ty(fi) + 18} x2={clkX} y2={an + 72} stroke={T.muted} strokeWidth={1} strokeDasharray="4 6" opacity={0.5} />
+              {!p.fanoutEdges && <line x1={qX} y1={ty(ti) + 18} x2={qX} y2={an + 72} stroke={T.muted} strokeWidth={1} strokeDasharray="4 6" opacity={0.5} />}
 
               {/* tCO — only when no fanout */}
               {!p.fanoutEdges && (<>
-                <line x1={clkX + 10} y1={laneY} x2={qX - 10} y2={laneY} stroke={S.delay} strokeWidth={1.5} strokeLinecap="round" />
-                <polygon points={`${clkX + 13},${laneY} ${clkX + 8},${laneY - 4} ${clkX + 8},${laneY + 4}`} fill={S.delay} />
-                <polygon points={`${qX - 13},${laneY} ${qX - 8},${laneY - 4} ${qX - 8},${laneY + 4}`} fill={S.delay} />
-                <text x={mx} y={laneY - 8} fill={S.delay} fontSize={12} fontWeight={700} fontFamily="Inter, sans-serif" textAnchor="middle" letterSpacing="1.5">tCO</text>
-                <circle cx={clkX} cy={laneY} r={2.5} fill={S.muted} opacity={0.5} />
-                <circle cx={qX} cy={laneY} r={2.5} fill={S.muted} opacity={0.5} />
+                <line x1={clkX + 10} y1={laneY} x2={qX - 10} y2={laneY} stroke={D.delay} strokeWidth={1.5} strokeLinecap="round" />
+                <polygon points={`${clkX + 13},${laneY} ${clkX + 8},${laneY - 4} ${clkX + 8},${laneY + 4}`} fill={D.delay} />
+                <polygon points={`${qX - 13},${laneY} ${qX - 8},${laneY - 4} ${qX - 8},${laneY + 4}`} fill={D.delay} />
+                <text x={mx} y={laneY - 8} fill={D.delay} fontSize={12} fontWeight={700} fontFamily="Inter, sans-serif" textAnchor="middle" letterSpacing="1.5">tCO</text>
+                <circle cx={clkX} cy={laneY} r={2.5} fill={T.muted} opacity={0.5} />
+                <circle cx={qX} cy={laneY} r={2.5} fill={T.muted} opacity={0.5} />
               </>)}
 
               {/* Fanout branches */}
@@ -458,15 +456,15 @@ export const DigitalTimingScene: React.FC<Props> = ({ spec }) => {
                     return (
                       <g key={`fb-${e.pinId}`}>
                         {/* Pink delay bracket */}
-                        <line x1={xa + 6} y1={bY} x2={xb - 6} y2={bY} stroke={S.delay} strokeWidth={1.5} strokeLinecap="round" opacity={0.8} />
-                        <polygon points={`${xa + 9},${bY} ${xa + 4},${bY - 4} ${xa + 4},${bY + 4}`} fill={S.delay} opacity={0.8} />
-                        <polygon points={`${xb - 9},${bY} ${xb - 4},${bY - 4} ${xb - 4},${bY + 4}`} fill={S.delay} opacity={0.8} />
+                        <line x1={xa + 6} y1={bY} x2={xb - 6} y2={bY} stroke={D.delay} strokeWidth={1.5} strokeLinecap="round" opacity={0.8} />
+                        <polygon points={`${xa + 9},${bY} ${xa + 4},${bY - 4} ${xa + 4},${bY + 4}`} fill={D.delay} opacity={0.8} />
+                        <polygon points={`${xb - 9},${bY} ${xb - 4},${bY - 4} ${xb - 4},${bY + 4}`} fill={D.delay} opacity={0.8} />
                         <rect x={tX - 24} y={bY - 20} width={48} height={18} rx={4} fill={S.panel} />
-                        <text x={tX} y={bY - 8} fill={S.delay} fontSize={10} fontFamily="monospace" fontWeight={700} textAnchor="middle">{e.label || `t${e.pinId.toUpperCase()}`}</text>
+                        <text x={tX} y={bY - 8} fill={D.delay} fontSize={10} fontFamily="monospace" fontWeight={700} textAnchor="middle">{e.label || `t${e.pinId.toUpperCase()}`}</text>
 
                         {/* Target ripple */}
                         {ripple > 0.03 && (
-                          <circle cx={xb} cy={tcy(idx)} r={4 + ripple * 12} fill="none" stroke={S.arrow} strokeWidth={2} opacity={ripple} />
+                          <circle cx={xb} cy={tcy(idx)} r={4 + ripple * 12} fill="none" stroke={D.arrow} strokeWidth={2} opacity={ripple} />
                         )}
                       </g>
                     );
@@ -483,8 +481,8 @@ export const DigitalTimingScene: React.FC<Props> = ({ spec }) => {
           const y = a.position === "top" ? 115 : an + 112;
           const ly = a.position === "top" ? y - 10 : y + 24;
           const isGlitch = a.text.toLowerCase().includes("glitch");
-          const color = isGlitch ? S.glitch : S.bright;
-          const lineColor = isGlitch ? S.glitch : S.muted;
+          const color = isGlitch ? D.glitch : T.bright;
+          const lineColor = isGlitch ? D.glitch : T.muted;
           return (
             <g key={`n-${i}`}>
               <line x1={x} y1={y} x2={x - 40} y2={ly} stroke={lineColor} strokeWidth={1} opacity={0.5} />
