@@ -149,8 +149,11 @@ export function computeTDSchedule(spec: TimingDiagramSpec): TimingDiagramSchedul
     offsetY: ann.offsetY ?? 0,
   }));
 
-  // ── Visible cycles (clamp to [1, totalCycles]) ──
+  // ── Visible cycles (clamp to [1, totalCycles], protect inverted range) ──
   const rawVisible = spec.visibleCycles ?? [1, spec.totalCycles];
+  if (rawVisible[0] > rawVisible[1]) {
+    rawVisible.reverse();
+  }
   const visibleCycles: [number, number] = [
     Math.max(1, Math.min(rawVisible[0], spec.totalCycles)),
     Math.max(1, Math.min(rawVisible[1], spec.totalCycles)),

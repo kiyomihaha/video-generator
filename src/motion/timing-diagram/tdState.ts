@@ -34,7 +34,7 @@ export function tdState(
       }
 
       // Fade-in: segment appears when cursor reaches its startCycle
-      const fadeInStart = (seg.startCycle - 1) * cyclePeriodFrames;
+      const fadeInStart = (seg.startCycle - 0.5) * cyclePeriodFrames;
       const fadeInEnd = fadeInStart + cyclePeriodFrames * 0.3;
       const opacity = clamp01((frame - fadeInStart) / Math.max(fadeInEnd - fadeInStart, 1));
 

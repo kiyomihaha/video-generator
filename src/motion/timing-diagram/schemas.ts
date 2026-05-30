@@ -92,12 +92,4 @@ export const timingDiagramSpecSchema = z.object({
     return true;
   },
   { message: "Binary signal values must be 0, 1, 'x', or 'z'", path: ["signals"] }
-).refine(
-  (spec) => {
-    if (spec.visibleCycles) {
-      return spec.visibleCycles[0] <= spec.visibleCycles[1];
-    }
-    return true;
-  },
-  { message: "visibleCycles[0] must be ≤ visibleCycles[1]", path: ["visibleCycles"] }
 );

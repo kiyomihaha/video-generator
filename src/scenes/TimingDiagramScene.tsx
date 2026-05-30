@@ -64,6 +64,7 @@ function binaryRendering(
   const elements: React.ReactNode[] = [];
   let d = "";
   let prevY: number | null = null;
+  let currentOpacity = 1;
 
   function flushPath(key: string, opacity: number) {
     if (d) {
@@ -87,7 +88,7 @@ function binaryRendering(
 
     if (seg.state === "z") {
       // High-impedance: mid-rail dashed
-      flushPath(`p-${i}`, opacity);
+      flushPath(`p-${i}`, currentOpacity);
       prevY = null;
       elements.push(
         <line key={`z-${start}`} x1={x1} y1={yMid} x2={x2} y2={yMid}
@@ -95,7 +96,7 @@ function binaryRendering(
       );
     } else if (seg.state === "x") {
       // Unknown: hatched rect
-      flushPath(`p-${i}`, opacity);
+      flushPath(`p-${i}`, currentOpacity);
       prevY = null;
       const rectH = yLow - yHigh;
       const hatchSpacing = 8;
@@ -115,11 +116,34 @@ function binaryRendering(
           X
         </text>,
       );
+    } else if (seg.state === "invalid") {
+      // Invalid: orange dashed double line with "!"
+      flushPath(`p-${i}`, currentOpacity);
+      prevY = null;
+      const rectH = yLow - yHigh;
+      elements.push(
+        <rect key={`inv-bg-${start}`} x={x1} y={yHigh} width={x2 - x1} height={rectH}
+          fill="#f97316" opacity={opacity * 0.15} rx={2} />,
+        <line key={`inv-l1-${start}`} x1={x1} y1={trackH * 0.35} x2={x2} y2={trackH * 0.35}
+          stroke="#f97316" strokeWidth={2} strokeDasharray="3 3" opacity={opacity} />,
+        <line key={`inv-l2-${start}`} x1={x1} y1={trackH * 0.65} x2={x2} y2={trackH * 0.65}
+          stroke="#f97316" strokeWidth={2} strokeDasharray="3 3" opacity={opacity} />,
+        <text key={`inv-t-${start}`} x={(x1 + x2) / 2} y={trackH / 2 + 4}
+          fill="#f97316" fontSize={13} fontFamily="monospace" textAnchor="middle" opacity={opacity}>
+          !
+        </text>,
+      );
     } else {
       // Normal binary: high or low
       const y = (typeof seg.value === "number" && seg.value === 1) ? yHigh : yLow;
       if (prevY === null) {
-        d += `M ${x1} ${y}`;
+        d = `M ${x1} ${y}`;
+        currentOpacity = opacity;
+      } else if (opacity !== currentOpacity) {
+        d += ` L ${x1} ${prevY}`;
+        flushPath(`p-${i}`, currentOpacity);
+        d = `M ${x1} ${y}`;
+        currentOpacity = opacity;
       } else if (prevY !== y) {
         d += ` L ${x1} ${prevY} L ${x1} ${y}`;
       }
@@ -129,7 +153,7 @@ function binaryRendering(
   }
 
   // Flush remaining path
-  flushPath("p-final", 1);
+  flushPath("p-final", currentOpacity);
 
   return elements;
 }
@@ -160,13 +184,17 @@ function busRendering(
     const y = trackH * 0.15;
     const h = trackH * 0.7;
 
-    if (seg.state === "x" || seg.state === "z") {
+    if (seg.state === "x" || seg.state === "z" || seg.state === "invalid") {
+      const fillColor = seg.state === "x" ? "#ef444430"
+        : seg.state === "z" ? "#f59e0b30"
+        : "#f9731630";
+      const label = seg.state === "invalid" ? "INV" : seg.state.toUpperCase();
       elements.push(
         <rect key={`${start}-bg`} x={x1} y={y} width={w} height={h}
-          fill={seg.state === "x" ? "#ef444430" : "#f59e0b30"} rx={3} opacity={opacity} />,
+          fill={fillColor} rx={3} opacity={opacity} />,
         <text key={`${start}-txt`} x={x1 + w / 2} y={trackH / 2 + 5}
           fill={T.muted} fontSize={14} fontFamily="monospace" textAnchor="middle" opacity={opacity}>
-          {seg.state.toUpperCase()}
+          {label}
         </text>,
       );
     } else {
@@ -281,13 +309,7 @@ export const TimingDiagramScene: React.FC<Props> = ({ schedule, title }) => {
 
             return (
               <g key={`wav-${track.id}`} transform={`translate(${CL}, ${ty})`}>
-                {scheduleTrack.encoding === "binary" ? (
-                  binaryRendering(track.segments, chartW, lane.h, visibleRange, scheduleTrack.color)
-                ) : (
-                  busRendering(track.segments, chartW, lane.h, visibleRange, scheduleTrack.color)
-                )}
-
-                {/* Segment highlight glow */}
+                {/* Segment highlight glow (behind waveform) */}
                 {track.segments.filter(s => s.highlight > 0.05).map((segState, si) => {
                   const seg = segState.segment;
                   if (seg.endCycle < vs || seg.startCycle > ve) return null;
@@ -300,9 +322,16 @@ export const TimingDiagramScene: React.FC<Props> = ({ schedule, title }) => {
                       fill={scheduleTrack.color} opacity={segState.highlight * 0.1} rx={3} />
                   );
                 })}
+
+                {scheduleTrack.encoding === "binary" ? (
+                  binaryRendering(track.segments, chartW, lane.h, visibleRange, scheduleTrack.color)
+                ) : (
+                  busRendering(track.segments, chartW, lane.h, visibleRange, scheduleTrack.color)
+                )}
               </g>
             );
           })}
+        </g>
 
           {/* ── Layer 6: Setup/Hold windows (signal overlays) ── */}
           {state.activeWindows.map((w, i) => {
@@ -310,8 +339,9 @@ export const TimingDiagramScene: React.FC<Props> = ({ schedule, title }) => {
             if (!track) return null;
             const lane = lanes[w.window.trackIndex];
             const ty = CT + lane.y;
-            const x1 = xOf(w.window.setupStartCycle);
-            const x2 = xOf(w.window.holdEndCycle);
+            const x1 = Math.max(CL, xOf(w.window.setupStartCycle));
+            const x2 = Math.min(CL + chartW, xOf(w.window.holdEndCycle));
+            if (x2 <= x1) return null;
             return (
               <g key={`shw${i}`}>
                 <rect x={x1} y={ty} width={x2 - x1} height={lane.h}
@@ -332,6 +362,7 @@ export const TimingDiagramScene: React.FC<Props> = ({ schedule, title }) => {
             const x = xOf(evt.event.cycle);
             const track = schedule.tracks[evt.event.trackIndex];
             if (!track) return null;
+            if (x < CL || x > CL + chartW) return null;
             const lane = lanes[evt.event.trackIndex];
             const ty = CT + lane.y;
             return (
@@ -349,7 +380,6 @@ export const TimingDiagramScene: React.FC<Props> = ({ schedule, title }) => {
               </g>
             );
           })}
-        </g>
 
         {/* ── Layer 8: Annotations (causal fade-in) ── */}
         {schedule.annotations.map((ann, i) => {
