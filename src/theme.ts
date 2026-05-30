@@ -15,6 +15,7 @@ export const THEME = {
     muted: "#64748b",
     dim: "#94a3b8",
     faint: "#475569",
+    onColor: "#ffffff",
   },
   // CS architecture domain colors (cache tag/index/offset)
   architecture: {
@@ -47,5 +48,22 @@ export const THEME = {
     cell: "#3b82f6",
     cellBorder: "#3b82f6",
     marker: "#38b8db",
+  },
+  // Virtual memory scene
+  vm: {
+    tlb: "#8b5cf6",
+    pageTable: "#6366f1",
+    walk: "#38bdf8",
+    fault: "#ef4444",
+    address: "#f59e0b",
+    decompose: "#c084fc",
+    decomposeAlt: "#818cf8",
+  },
+  // Branch prediction — 2-bit saturating counter states
+  counter: {
+    stronglyNotTaken: "#ef4444",
+    weaklyNotTaken: "#f97316",
+    weaklyTaken: "#22c55e",
+    stronglyTaken: "#10b981",
   },
 } as const;

@@ -1,0 +1,115 @@
+{
+  "id": "async-reset-sync-release",
+  "title": "异步复位同步释放 — 时序分析",
+  "clockPeriod": 0.5,
+  "totalCycles": 10,
+  "signals": [
+    {
+      "id": "clk",
+      "name": "CLK",
+      "encoding": "binary",
+      "color": "#60a5fa",
+      "values": [
+        { "cycle": 1, "value": 0 },
+        { "cycle": 2, "value": 1 },
+        { "cycle": 3, "value": 0 },
+        { "cycle": 4, "value": 1 },
+        { "cycle": 5, "value": 0 },
+        { "cycle": 6, "value": 1 },
+        { "cycle": 7, "value": 0 },
+        { "cycle": 8, "value": 1 },
+        { "cycle": 9, "value": 0 },
+        { "cycle": 10, "value": 1 }
+      ]
+    },
+    {
+      "id": "rst_n",
+      "name": "RST_n",
+      "encoding": "binary",
+      "color": "#f472b6",
+      "values": [
+        { "cycle": 1, "value": 0 },
+        { "cycle": 4, "value": 1, "edge": "rising" }
+      ]
+    },
+    {
+      "id": "d",
+      "name": "D",
+      "encoding": "binary",
+      "color": "#facc15",
+      "values": [
+        { "cycle": 1, "value": 0 },
+        { "cycle": 5, "value": 1 },
+        { "cycle": 7, "value": 0 }
+      ]
+    },
+    {
+      "id": "q",
+      "name": "Q",
+      "encoding": "binary",
+      "color": "#4ade80",
+      "values": [
+        { "cycle": 1, "value": 0 },
+        { "cycle": 6, "value": 1, "edge": "rising" },
+        { "cycle": 8, "value": 0 }
+      ]
+    },
+    {
+      "id": "data",
+      "name": "DATA",
+      "label": "DATA[7:0]",
+      "encoding": "bus",
+      "busWidth": 8,
+      "color": "#38bdf8",
+      "values": [
+        { "cycle": 1, "value": 0, "displayValue": "0x00" },
+        { "cycle": 5, "value": 170, "displayValue": "0xAA" },
+        { "cycle": 8, "value": 85, "displayValue": "0x55" }
+      ]
+    }
+  ],
+  "groups": [
+    { "name": "Clock/Reset", "signalIds": ["clk", "rst_n"] },
+    { "name": "Data Path", "signalIds": ["d", "q", "data"] }
+  ],
+  "setupHoldWindows": [
+    {
+      "signalId": "rst_n",
+      "referenceCycle": 4,
+      "setupStart": -0.5,
+      "holdEnd": 0.5,
+      "color": "#ef444466",
+      "label": "危险窗口"
+    }
+  ],
+  "events": [
+    {
+      "id": "evt-deassert",
+      "cycle": 4,
+      "signalId": "rst_n",
+      "type": "deassert",
+      "edge": "rising",
+      "label": "异步释放"
+    },
+    {
+      "id": "evt-sample",
+      "cycle": 6,
+      "signalId": "q",
+      "type": "assert",
+      "edge": "rising",
+      "label": "同步采样"
+    }
+  ],
+  "annotations": [
+    {
+      "cycle": 4,
+      "text": "复位释放靠近时钟边沿 → 亚稳态风险",
+      "position": "top"
+    },
+    {
+      "cycle": 6,
+      "text": "同步释放：所有寄存器在同一拍退出复位",
+      "position": "bottom"
+    }
+  ]
+}
