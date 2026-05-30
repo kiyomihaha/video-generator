@@ -1,0 +1,29 @@
+{
+  "zones": [
+    {"id": "fetch", "label": "取指", "x": 30, "y": 300, "width": 180, "height": 80},
+    {"id": "decode", "label": "译码", "x": 290, "y": 300, "width": 180, "height": 80},
+    {"id": "execute", "label": "执行", "x": 550, "y": 300, "width": 180, "height": 80},
+    {"id": "memory", "label": "访存", "x": 810, "y": 300, "width": 180, "height": 80},
+    {"id": "writeback", "label": "写回", "x": 1070, "y": 300, "width": 180, "height": 80}
+  ],
+  "links": [
+    {"id": "l0", "fromZoneId": "fetch", "toZoneId": "decode", "path": "M 210 340 Q 250 314 290 340"},
+    {"id": "l1", "fromZoneId": "decode", "toZoneId": "execute", "path": "M 470 340 Q 510 314 550 340"},
+    {"id": "l2", "fromZoneId": "execute", "toZoneId": "memory", "path": "M 730 340 Q 770 314 810 340"},
+    {"id": "l3", "fromZoneId": "memory", "toZoneId": "writeback", "path": "M 990 340 Q 1030 314 1070 340"}
+  ],
+  "cycles": [
+    {"cycle": 1, "zoneStates": [{"zoneId": "fetch", "state": "ACTIVE"}], "pulses": [{"linkId": "l0"}]},
+    {"cycle": 2, "zoneStates": [{"zoneId": "decode", "state": "ACTIVE"}], "pulses": [{"linkId": "l1"}]},
+    {"cycle": 3, "zoneStates": [{"zoneId": "execute", "state": "ACTIVE"}], "pulses": [{"linkId": "l2"}]},
+    {"cycle": 4, "zoneStates": [{"zoneId": "memory", "state": "ACTIVE"}], "pulses": [{"linkId": "l3"}]},
+    {"cycle": 5, "zoneStates": [{"zoneId": "writeback", "state": "ACTIVE", "modifiers": ["flash"]}], "pulses": []},
+    {"cycle": 6, "zoneStates": [{"zoneId": "execute", "state": "METASTABLE", "modifiers": ["glitch", "shake"]}], "pulses": []},
+    {"cycle": 7, "zoneStates": [], "pulses": []}
+  ],
+  "framesPerCycle": 30,
+  "cascadeOrder": [["l0"], ["l1"], ["l2"], ["l3"]],
+  "width": 1280,
+  "height": 720,
+  "title": "五级流水线"
+}

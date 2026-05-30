@@ -15,6 +15,7 @@ import branchPredictionSpec from "../../public/specs/branch-prediction-demo.json
 import virtualMemorySpec from "../../public/specs/virtual-memory-demo.json";
 import timingDiagramSpec from "../../public/specs/timing-diagram-demo.json";
 import textEmphasisSpec from "../../public/specs/text-emphasis-demo.json";
+import cwlSpec from "../../public/specs/cwl-demo.json";
 
 import { digitalTimingSpecSchema } from "../motion/primitives/schemas";
 import { pipelineSpecSchema } from "../motion/pipeline/schemas";
@@ -35,6 +36,7 @@ import { BranchPredictionDemo } from "../branch-prediction-demo/index";
 import { VirtualMemoryDemo } from "../virtual-memory-demo/index";
 import { TimingDiagramDemo } from "../timing-diagram-demo/index";
 import { TextEmphasisDemo } from "../text-emphasis-demo/index";
+import { CircuitWaveformDemo } from "../circuit-waveform-demo/index";
 
 import type { DigitalTimingSpec } from "../motion/primitives/types";
 import type { PipelineSpec } from "../motion/pipeline/types";
@@ -44,6 +46,8 @@ import type { VirtualMemorySpec } from "../motion/virtual-memory/types";
 import type { TimingDiagramSpec } from "../motion/timing-diagram/types";
 import type { TextEmphasisSpec } from "../motion/text-emphasis/types";
 import { computeTESchedule } from "../motion/text-emphasis/teSchedule";
+import { circuitWaveformLinkerAuthoringSchema } from "../motion/linker/schemas";
+import type { CircuitWaveformLinkerAuthoring } from "../motion/linker/types";
 
 interface SceneEntry<TSpec> {
   component: ComponentType<{ spec: TSpec }>;
@@ -89,6 +93,12 @@ const calcTimingDiagram: CalculateMetadataFunction<{ spec: TimingDiagramSpec }> 
 const calcTextEmphasis: CalculateMetadataFunction<{ spec: TextEmphasisSpec }> = ({ props }) => {
   const schedule = computeTESchedule(props.spec, 60);
   return { durationInFrames: schedule.totalFrames };
+};
+
+// CircuitWaveformLinker: duration from maxCycle * framesPerCycle + 1 tail cycle
+const calcCircuitWaveform: CalculateMetadataFunction<{ spec: CircuitWaveformLinkerAuthoring }> = ({ props }) => {
+  const maxCycle = Math.max(...props.spec.cycles.map(c => c.cycle));
+  return { durationInFrames: (maxCycle + 1) * props.spec.framesPerCycle };
 };
 
 // Validate all specs at module load — fail-fast on bad JSON
@@ -185,6 +195,14 @@ export const sceneRegistry: Record<string, SceneEntry<any>> = {
     component: TextEmphasisDemo,
     spec: textEmphasisSpecSchema.parse(textEmphasisSpec),
     calculateMetadata: calcTextEmphasis,
+    fps: 60,
+    width: 1280,
+    height: 720,
+  },
+  CircuitWaveformDemo: {
+    component: CircuitWaveformDemo,
+    spec: circuitWaveformLinkerAuthoringSchema.parse(cwlSpec),
+    calculateMetadata: calcCircuitWaveform,
     fps: 60,
     width: 1280,
     height: 720,
