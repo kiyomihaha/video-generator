@@ -1,0 +1,48 @@
+{
+  "phrases": [
+    {
+      "id": "title",
+      "text": "建立时间与保持时间",
+      "startBeat": 0,
+      "entrance": "slide-up",
+      "emphasis": [{"beat": 2, "type": "glow", "intensity": 0.8}],
+      "endBeat": 4,
+      "x": 0.5, "y": 0.25,
+      "fontSize": 48,
+      "fontWeight": 800
+    },
+    {
+      "id": "setup",
+      "text": "Tsetup = 2.0ns",
+      "startBeat": 1,
+      "entrance": "typewriter",
+      "emphasis": [{"beat": 2, "type": "color-shift", "color": "#38bdf8"}],
+      "endBeat": 3,
+      "x": 0.5, "y": 0.47,
+      "fontFamily": "code",
+      "fontSize": 36
+    },
+    {
+      "id": "hold",
+      "text": "Thold = 1.5ns",
+      "startBeat": 2,
+      "entrance": "typewriter",
+      "emphasis": [{"beat": 3, "type": "color-shift", "color": "#f472b6"}],
+      "endBeat": 4,
+      "x": 0.5, "y": 0.6,
+      "fontFamily": "code",
+      "fontSize": 36
+    },
+    {
+      "id": "conclusion",
+      "text": "数据必须在时钟沿前 Tsetup 到达\n且保持 Thold 不变",
+      "startBeat": 4,
+      "entrance": "wipe-left",
+      "x": 0.5, "y": 0.78,
+      "fontSize": 28,
+      "fontWeight": 500,
+      "anchor": "center"
+    }
+  ],
+  "beats": [0.5, 1.2, 1.8, 2.8, 3.6, 4.5]
+}

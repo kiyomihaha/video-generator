@@ -14,6 +14,7 @@ import cacheSpec from "../../public/specs/cache-demo.json";
 import branchPredictionSpec from "../../public/specs/branch-prediction-demo.json";
 import virtualMemorySpec from "../../public/specs/virtual-memory-demo.json";
 import timingDiagramSpec from "../../public/specs/timing-diagram-demo.json";
+import textEmphasisSpec from "../../public/specs/text-emphasis-demo.json";
 
 import { digitalTimingSpecSchema } from "../motion/primitives/schemas";
 import { pipelineSpecSchema } from "../motion/pipeline/schemas";
@@ -21,6 +22,7 @@ import { cacheSpecSchema } from "../motion/cache/schemas";
 import { branchPredictionSpecSchema } from "../motion/branch-prediction/schemas";
 import { virtualMemorySpecSchema } from "../motion/virtual-memory/schemas";
 import { timingDiagramSpecSchema } from "../motion/timing-diagram/schemas";
+import { textEmphasisSpecSchema } from "../motion/text-emphasis/schemas";
 
 import { ClockToQDemo } from "../digital-demo/index";
 import { FanoutDemo } from "../fanout-demo/index";
@@ -32,6 +34,7 @@ import { CacheDemo } from "../cache-demo/index";
 import { BranchPredictionDemo } from "../branch-prediction-demo/index";
 import { VirtualMemoryDemo } from "../virtual-memory-demo/index";
 import { TimingDiagramDemo } from "../timing-diagram-demo/index";
+import { TextEmphasisDemo } from "../text-emphasis-demo/index";
 
 import type { DigitalTimingSpec } from "../motion/primitives/types";
 import type { PipelineSpec } from "../motion/pipeline/types";
@@ -39,6 +42,8 @@ import type { CacheSpec } from "../motion/cache/types";
 import type { BranchPredictionSpec } from "../motion/branch-prediction/types";
 import type { VirtualMemorySpec } from "../motion/virtual-memory/types";
 import type { TimingDiagramSpec } from "../motion/timing-diagram/types";
+import type { TextEmphasisSpec } from "../motion/text-emphasis/types";
+import { computeTESchedule } from "../motion/text-emphasis/teSchedule";
 
 interface SceneEntry<TSpec> {
   component: ComponentType<{ spec: TSpec }>;
@@ -78,6 +83,12 @@ const calcVirtualMemory: CalculateMetadataFunction<{ spec: VirtualMemorySpec }> 
 // TimingDiagram: duration from totalCycles * clockPeriod * fps
 const calcTimingDiagram: CalculateMetadataFunction<{ spec: TimingDiagramSpec }> = ({ props }) => {
   return { durationInFrames: Math.ceil(props.spec.totalCycles * props.spec.clockPeriod * 60) };
+};
+
+// TextEmphasis: duration from schedule totalFrames
+const calcTextEmphasis: CalculateMetadataFunction<{ spec: TextEmphasisSpec }> = ({ props }) => {
+  const schedule = computeTESchedule(props.spec, 60);
+  return { durationInFrames: schedule.totalFrames };
 };
 
 // Validate all specs at module load — fail-fast on bad JSON
@@ -166,6 +177,14 @@ export const sceneRegistry: Record<string, SceneEntry<any>> = {
     component: TimingDiagramDemo,
     spec: timingDiagramSpecSchema.parse(timingDiagramSpec),
     calculateMetadata: calcTimingDiagram,
+    fps: 60,
+    width: 1280,
+    height: 720,
+  },
+  TextEmphasisDemo: {
+    component: TextEmphasisDemo,
+    spec: textEmphasisSpecSchema.parse(textEmphasisSpec),
+    calculateMetadata: calcTextEmphasis,
     fps: 60,
     width: 1280,
     height: 720,
