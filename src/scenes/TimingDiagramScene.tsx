@@ -231,9 +231,10 @@ export const TimingDiagramScene: React.FC<Props> = ({ schedule, title }) => {
         {/* ── Layer 1: Background ── */}
         <rect width={VW} height={VH} fill={S.bg} />
 
-        {/* ── Layer 2: Title ── */}
+        {/* ── Layer 2: Title (fades in with cursor) ── */}
         {title && (
-          <text x={60} y={30} fill={T.primary} fontSize={26} fontFamily="Inter, sans-serif" fontWeight={800}>
+          <text x={60} y={30} fill={T.primary} fontSize={26} fontFamily="Inter, sans-serif" fontWeight={800}
+            opacity={state.titleOpacity} style={{ transform: `translateY(${(1 - state.titleOpacity) * 10}px)` }}>
             {title}
           </text>
         )}
@@ -350,15 +351,16 @@ export const TimingDiagramScene: React.FC<Props> = ({ schedule, title }) => {
           })}
         </g>
 
-        {/* ── Layer 8: Annotations (above data, below cursor) ── */}
+        {/* ── Layer 8: Annotations (causal fade-in) ── */}
         {schedule.annotations.map((ann, i) => {
+          const anim = state.annotationAnimStates[i];
           const x = xOf(ann.cycle) + (ann.offsetX ?? 0);
-          const y = ann.position === "top"
+          const baseY = ann.position === "top"
             ? CT - 20 + (ann.offsetY ?? 0)
             : CT + tracksH + 60 + (ann.offsetY ?? 0);
           return (
-            <text key={`ann${i}`} x={x} y={y} fill={ann.color} fontSize={13}
-              fontFamily="Inter, sans-serif" fontWeight={600} textAnchor="middle">
+            <text key={`ann${i}`} x={x} y={baseY + anim.yOffset} fill={ann.color} fontSize={13}
+              fontFamily="Inter, sans-serif" fontWeight={600} textAnchor="middle" opacity={anim.opacity}>
               {ann.text}
             </text>
           );

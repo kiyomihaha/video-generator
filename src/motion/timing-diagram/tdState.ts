@@ -8,8 +8,10 @@ import type {
   TDSegmentState,
   ActiveTDEvent,
   ActiveTDWindow,
+  AnnotationAnimState,
 } from "./types";
 import { clamp01, easeOutCubic } from "../utils";
+import { spring } from "remotion";
 
 export function tdState(
   schedule: TimingDiagramSchedule,
@@ -83,6 +85,33 @@ export function tdState(
     })
     .filter((w): w is ActiveTDWindow => w !== null);
 
+  // ── Annotations & Title (causal fade-in) ──
+  const earliestAnnCycle = schedule.annotations.length > 0
+    ? Math.min(...schedule.annotations.map(a => a.cycle))
+    : Infinity;
+
+  // Title fades in 0.3 cycles before the earliest annotation
+  const titleTriggerFrame = (earliestAnnCycle - 0.8) * cyclePeriodFrames;
+  const titleSpring = spring({
+    frame: frame - titleTriggerFrame,
+    fps,
+    config: { damping: 15, stiffness: 120 },
+  });
+  const titleOpacity = schedule.annotations.length > 0 ? clamp01(titleSpring) : 1;
+
+  // Each annotation fades in when cursor approaches its cycle
+  const annotationAnimStates: AnnotationAnimState[] = schedule.annotations.map((ann) => {
+    const triggerFrame = (ann.cycle - 0.5) * cyclePeriodFrames;
+    const raw = spring({
+      frame: frame - triggerFrame,
+      fps,
+      config: { damping: 15, stiffness: 120 },
+    });
+    const opacity = clamp01(raw);
+    const yOffset = (1 - clamp01(raw)) * 12;
+    return { opacity, yOffset };
+  });
+
   return {
     tracks,
     cursorCycle,
@@ -90,5 +119,7 @@ export function tdState(
     activeEvents,
     activeWindows,
     title: null,
+    titleOpacity,
+    annotationAnimStates,
   };
 }

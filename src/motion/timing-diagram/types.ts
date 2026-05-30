@@ -139,6 +139,13 @@ export interface TimingDiagramState {
   activeEvents: ActiveTDEvent[];
   activeWindows: ActiveTDWindow[];
   title: string | null;
+  titleOpacity: number;
+  annotationAnimStates: AnnotationAnimState[];
+}
+
+export interface AnnotationAnimState {
+  opacity: number;
+  yOffset: number;
 }
 
 export interface TDTrackState {
