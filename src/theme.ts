@@ -66,4 +66,15 @@ export const THEME = {
     weaklyTaken: "#22c55e",
     stronglyTaken: "#10b981",
   },
+  // LayeredArchitecture — stacked layer color palette
+  layers: {
+    layer1: "#38bdf8",
+    layer2: "#10b981",
+    layer3: "#f59e0b",
+    layer4: "#8b5cf6",
+    layer5: "#ef4444",
+    layer6: "#ec4899",
+    layer7: "#06b6d4",
+    layer8: "#84cc16",
+  },
 } as const;

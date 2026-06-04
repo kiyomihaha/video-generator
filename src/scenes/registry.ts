@@ -16,6 +16,7 @@ import virtualMemorySpec from "../../public/specs/virtual-memory-demo.json";
 import timingDiagramSpec from "../../public/specs/timing-diagram-demo.json";
 import textEmphasisSpec from "../../public/specs/text-emphasis-demo.json";
 import cwlSpec from "../../public/specs/cwl-demo.json";
+import laSpec from "../../public/specs/layered-architecture-demo.json";
 
 import { digitalTimingSpecSchema } from "../motion/primitives/schemas";
 import { pipelineSpecSchema } from "../motion/pipeline/schemas";
@@ -37,6 +38,7 @@ import { VirtualMemoryDemo } from "../virtual-memory-demo/index";
 import { TimingDiagramDemo } from "../timing-diagram-demo/index";
 import { TextEmphasisDemo } from "../text-emphasis-demo/index";
 import { CircuitWaveformDemo } from "../circuit-waveform-demo/index";
+import { LayeredArchitectureDemo } from "../layered-architecture-demo/index";
 
 import type { DigitalTimingSpec } from "../motion/primitives/types";
 import type { PipelineSpec } from "../motion/pipeline/types";
@@ -48,6 +50,9 @@ import type { TextEmphasisSpec } from "../motion/text-emphasis/types";
 import { computeTESchedule } from "../motion/text-emphasis/teSchedule";
 import { circuitWaveformLinkerAuthoringSchema } from "../motion/linker/schemas";
 import type { CircuitWaveformLinkerAuthoring } from "../motion/linker/types";
+import { layeredArchitectureSpecSchema } from "../motion/layered-architecture/schemas";
+import type { LayeredArchitectureSpec } from "../motion/layered-architecture/types";
+import { computeLASchedule } from "../motion/layered-architecture/laSchedule";
 
 interface SceneEntry<TSpec> {
   component: ComponentType<{ spec: TSpec }>;
@@ -99,6 +104,12 @@ const calcTextEmphasis: CalculateMetadataFunction<{ spec: TextEmphasisSpec }> = 
 const calcCircuitWaveform: CalculateMetadataFunction<{ spec: CircuitWaveformLinkerAuthoring }> = ({ props }) => {
   const maxCycle = Math.max(...props.spec.cycles.map(c => c.cycle));
   return { durationInFrames: (maxCycle + 1) * props.spec.framesPerCycle };
+};
+
+// LayeredArchitecture: duration from schedule totalFrames
+const calcLayeredArchitecture: CalculateMetadataFunction<{ spec: LayeredArchitectureSpec }> = ({ props }) => {
+  const schedule = computeLASchedule(props.spec, 60);
+  return { durationInFrames: schedule.totalFrames };
 };
 
 // Validate all specs at module load — fail-fast on bad JSON
@@ -203,6 +214,14 @@ export const sceneRegistry: Record<string, SceneEntry<any>> = {
     component: CircuitWaveformDemo,
     spec: circuitWaveformLinkerAuthoringSchema.parse(cwlSpec),
     calculateMetadata: calcCircuitWaveform,
+    fps: 60,
+    width: 1280,
+    height: 720,
+  },
+  LayeredArchitectureDemo: {
+    component: LayeredArchitectureDemo,
+    spec: layeredArchitectureSpecSchema.parse(laSpec),
+    calculateMetadata: calcLayeredArchitecture,
     fps: 60,
     width: 1280,
     height: 720,

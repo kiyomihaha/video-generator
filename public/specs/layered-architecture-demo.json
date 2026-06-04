@@ -1,0 +1,51 @@
+{
+  "layers": [
+    {
+      "id": "application",
+      "label": "Application Layer",
+      "description": "用户应用与界面",
+      "labelAnchor": "left"
+    },
+    {
+      "id": "agent",
+      "label": "Agent Layer",
+      "description": "智能体编排与调度"
+    },
+    {
+      "id": "model",
+      "label": "Model Layer",
+      "description": "大语言模型推理"
+    },
+    {
+      "id": "framework",
+      "label": "Framework Layer",
+      "description": "LangChain / 工具链"
+    },
+    {
+      "id": "infrastructure",
+      "label": "Infrastructure Layer",
+      "description": "GPU / CPU / 网络"
+    }
+  ],
+  "timeline": [
+    { "beat": 0, "type": "enter", "layerId": "infrastructure" },
+    { "beat": 0, "type": "enter", "layerId": "framework" },
+    { "beat": 0, "type": "enter", "layerId": "model" },
+    { "beat": 0, "type": "enter", "layerId": "agent" },
+    { "beat": 0, "type": "enter", "layerId": "application" },
+    { "beat": 2, "type": "data-flow", "layerId": "infrastructure", "targetLayerId": "framework", "direction": "up" },
+    { "beat": 3, "type": "data-flow", "layerId": "framework", "targetLayerId": "model", "direction": "up" },
+    { "beat": 4, "type": "focus", "layerIds": ["agent", "model"], "durationBeats": 3 },
+    { "beat": 5, "type": "data-flow", "layerId": "model", "targetLayerId": "agent", "direction": "up" },
+    { "beat": 6, "type": "data-flow", "layerId": "agent", "targetLayerId": "application", "direction": "up" },
+    { "beat": 7, "type": "restore" },
+    { "beat": 7, "type": "callout", "layerId": "application", "label": "用户交互入口" },
+    { "beat": 8, "type": "callout", "layerId": "agent", "label": "意图路由与编排" },
+    { "beat": 9, "type": "callout", "layerId": "model", "label": "推理与生成" }
+  ],
+  "beats": [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5],
+  "buildOrder": "bottom-up",
+  "staggerEnter": true,
+  "width": 1280,
+  "height": 720
+}
