@@ -3,8 +3,7 @@
     {
       "id": "application",
       "label": "Application Layer",
-      "description": "用户应用与界面",
-      "labelAnchor": "left"
+      "description": "用户应用与界面"
     },
     {
       "id": "agent",

@@ -54,14 +54,14 @@ function computeModifierState(events: ResolvedTimelineEvent[], frame: number) {
     }
   }
 
-  return { highlighted, dimExempt, dimActive, inRestoreAnim };
+  return { highlighted, dimExempt, dimActive, inRestoreAnim, restoreBoundary };
 }
 
 export function computeLAState(schedule: LASchedule, frame: number): LAState {
   const events = schedule.events;
 
   // Compute modifier state (highlight, dim, restore)
-  const { highlighted, dimExempt, dimActive, inRestoreAnim } = computeModifierState(events, frame);
+  const { highlighted, dimExempt, dimActive, inRestoreAnim, restoreBoundary } = computeModifierState(events, frame);
 
   // Per-layer state
   const layers: LALayerState[] = schedule.layers.map((layer) => {
@@ -143,7 +143,10 @@ export function computeLAState(schedule: LASchedule, frame: number): LAState {
 
     const elapsed = frame - ev.frame;
     const duration = ev.endFrame - ev.frame;
-    const progress = easeOutCubic(clamp01(elapsed / duration));
+    const animDuration = Math.round(duration * 0.6);
+    const progress = elapsed < animDuration
+      ? easeOutCubic(clamp01(elapsed / animDuration))
+      : 1;
 
     dataFlows.push({
       fromY: fromLayer.y + schedule.layerHeight / 2,
@@ -153,23 +156,26 @@ export function computeLAState(schedule: LASchedule, frame: number): LAState {
     });
   }
 
-  // ── Callout events (active within their duration) ──
+  // ── Callout events (persistent until restore) ──
   const callouts: LACalloutRender[] = [];
-  for (const ev of events) {
+  for (let i = 0; i < events.length; i++) {
+    const ev = events[i];
     if (ev.type !== "callout") continue;
-    if (frame < ev.frame || frame >= ev.endFrame) continue;
+    if (restoreBoundary >= 0 && i <= restoreBoundary) continue;
+    if (frame < ev.frame) continue;
+    if (ev.endFrame > 0 && frame >= ev.endFrame) continue;
 
     const layer = schedule.layers.find((l) => l.id === ev.layerId);
     if (!layer) continue;
 
     const elapsed = frame - ev.frame;
-    const duration = ev.endFrame - ev.frame;
-    const progress = clamp01(elapsed / duration);
+    const fadeInDuration = Math.round(0.2 * schedule.fps);
+    const opacity = easeOutCubic(clamp01(elapsed / fadeInDuration));
 
     callouts.push({
       layerId: ev.layerId!,
       label: ev.label ?? "",
-      opacity: easeOutCubic(progress),
+      opacity,
       x: 40,
       y: layer.y + schedule.layerHeight / 2,
     });

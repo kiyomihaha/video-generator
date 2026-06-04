@@ -53,8 +53,7 @@ export function computeLASchedule(spec: LayeredArchitectureSpec, fps: number): L
   // Fps-derived animation durations
   const enterFrames = Math.round(0.35 * fps);
   const exitFrames = Math.round(0.3 * fps);
-  const flowFrames = Math.round(0.3 * fps);
-  const calloutFrames = Math.round(0.2 * fps);
+  const flowFrames = Math.round(1.0 * fps);
 
   // Compute beat-to-frame conversion
   const beatFrames = spec.beats.map((b) => Math.round(b * fps));
@@ -119,9 +118,10 @@ export function computeLASchedule(spec: LayeredArchitectureSpec, fps: number): L
           durationFrames = flowFrames;
           break;
         case "callout":
-          durationFrames = ev.durationBeats
-            ? Math.round(ev.durationBeats * fps)
-            : calloutFrames;
+          if (ev.durationBeats) {
+            durationFrames = Math.round(ev.durationBeats * fps);
+          }
+          // Default: persistent until restore (endFrame stays 0)
           break;
         case "highlight":
         case "dim-others":

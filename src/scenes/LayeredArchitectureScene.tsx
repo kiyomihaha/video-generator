@@ -160,8 +160,8 @@ export const LayeredArchitectureScene: React.FC<Props> = ({ schedule }) => {
 
         {/* Callout labels (on left side) */}
         {state.callouts.map((c, i) => {
-          const lineX = 44;
-          const textX = 52;
+          const lineX = 80;
+          const textX = 88;
           const maxChars = 25;
           const lines: string[] = [];
           for (let j = 0; j < c.label.length; j += maxChars) {
@@ -171,7 +171,7 @@ export const LayeredArchitectureScene: React.FC<Props> = ({ schedule }) => {
           return (
             <g key={`callout-${i}`} opacity={c.opacity}>
               <line
-                x1={4} y1={c.y}
+                x1={40} y1={c.y}
                 x2={lineX} y2={c.y}
                 stroke="#94a3b8"
                 strokeWidth={1}
@@ -182,6 +182,7 @@ export const LayeredArchitectureScene: React.FC<Props> = ({ schedule }) => {
                 y={c.y - ((lines.length - 1) * 16) / 2}
                 fill="#94a3b8"
                 fontSize={14}
+                textAnchor="start"
                 dominantBaseline="central"
               >
                 {lines.map((line, j) => (
