@@ -1,0 +1,56 @@
+{
+  "id": "vm-demo",
+  "title": "Two-Level Page Table — TLB Hit, Miss & Page Fault",
+  "addressBits": 16,
+  "pageSize": 256,
+  "numLevels": 2,
+  "entriesPerLevel": [4, 8],
+  "tlbSets": 2,
+  "tlbAssociativity": 2,
+  "replacement": "LRU",
+  "clockPeriod": 1,
+  "accesses": [
+    {
+      "id": "A1",
+      "virtualAddress": 1024,
+      "type": "read",
+      "cycle": 1,
+      "label": "Cold miss → walk → fill TLB"
+    },
+    {
+      "id": "A2",
+      "virtualAddress": 1028,
+      "type": "read",
+      "cycle": 2,
+      "label": "TLB hit (same page)"
+    },
+    {
+      "id": "A3",
+      "virtualAddress": 2048,
+      "type": "write",
+      "cycle": 3,
+      "label": "TLB miss → walk → evict A1"
+    },
+    {
+      "id": "A4",
+      "virtualAddress": 3072,
+      "type": "read",
+      "cycle": 4,
+      "label": "Page fault (unmapped)"
+    },
+    {
+      "id": "A5",
+      "virtualAddress": 2052,
+      "type": "read",
+      "cycle": 5,
+      "label": "TLB hit (A3 filled it)"
+    },
+    {
+      "id": "A6",
+      "virtualAddress": 4096,
+      "type": "execute",
+      "cycle": 6,
+      "label": "TLB miss → walk"
+    }
+  ]
+}
