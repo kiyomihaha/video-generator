@@ -1,0 +1,91 @@
+{
+  "title": "CalloutOverlay + ConnectorSystem Demo",
+  "durationInFrames": 300,
+  "fps": 60,
+  "diagram": {
+    "nodes": [
+      { "id": "cpu", "x": 200, "y": 100, "w": 160, "h": 60, "label": "CPU Core", "color": "#38bdf8" },
+      { "id": "l1", "x": 200, "y": 220, "w": 160, "h": 60, "label": "L1 Cache", "color": "#10b981" },
+      { "id": "l2", "x": 200, "y": 340, "w": 160, "h": 60, "label": "L2 Cache", "color": "#f59e0b" },
+      { "id": "memory", "x": 200, "y": 460, "w": 160, "h": 60, "label": "Main Memory", "color": "#8b5cf6" }
+    ]
+  },
+  "callouts": [
+    {
+      "id": "c1",
+      "targetX": 280, "targetY": 130,
+      "label": "Execute Instructions",
+      "sublabel": "Fetch-decode-execute cycle",
+      "preferredQuadrant": "top-left",
+      "color": "#38bdf8",
+      "startFrame": 30
+    },
+    {
+      "id": "c2",
+      "targetX": 280, "targetY": 250,
+      "label": "Fast On-Chip SRAM",
+      "sublabel": "~1ns access latency",
+      "preferredQuadrant": "top-left",
+      "color": "#10b981",
+      "startFrame": 75
+    },
+    {
+      "id": "c3",
+      "targetX": 280, "targetY": 370,
+      "label": "Larger But Slower",
+      "sublabel": "~10ns, shared among cores",
+      "preferredQuadrant": "bottom-left",
+      "color": "#f59e0b",
+      "startFrame": 120
+    },
+    {
+      "id": "c4",
+      "targetX": 280, "targetY": 490,
+      "label": "DRAM — Main Memory",
+      "sublabel": "~100ns, gigabytes capacity",
+      "preferredQuadrant": "bottom-left",
+      "color": "#8b5cf6",
+      "startFrame": 165
+    }
+  ],
+  "connectors": [
+    {
+      "id": "cpu-to-l1",
+      "fromX": 280, "fromY": 160,
+      "toX": 280, "toY": 220,
+      "color": "#38bdf8",
+      "direction": "bidirectional",
+      "animated": true,
+      "startFrame": 150
+    },
+    {
+      "id": "l1-to-l2",
+      "fromX": 280, "fromY": 280,
+      "toX": 280, "toY": 340,
+      "color": "#10b981",
+      "direction": "bidirectional",
+      "animated": true,
+      "startFrame": 210
+    },
+    {
+      "id": "l2-to-mem",
+      "fromX": 280, "fromY": 400,
+      "toX": 280, "toY": 460,
+      "color": "#f59e0b",
+      "direction": "bidirectional",
+      "animated": true,
+      "startFrame": 255
+    },
+    {
+      "id": "bypass",
+      "fromX": 450, "fromY": 130,
+      "toX": 450, "toY": 490,
+      "color": "#ef4444",
+      "direction": "forward",
+      "animated": true,
+      "dashed": true,
+      "strokeWidth": 1.5,
+      "startFrame": 285
+    }
+  ]
+}
