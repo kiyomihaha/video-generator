@@ -13,6 +13,7 @@ import pipelineSpec from "../../public/specs/pipeline-demo.json";
 import cacheSpec from "../../public/specs/cache-demo.json";
 import branchPredictionSpec from "../../public/specs/branch-prediction-demo.json";
 import virtualMemorySpec from "../../public/specs/virtual-memory-demo.json";
+import virtualMemoryVideoSpec from "../../public/specs/virtual-memory-video.json";
 import timingDiagramSpec from "../../public/specs/timing-diagram-demo.json";
 import textEmphasisSpec from "../../public/specs/text-emphasis-demo.json";
 import cwlSpec from "../../public/specs/cwl-demo.json";
@@ -204,6 +205,63 @@ export const sceneRegistry: Record<string, SceneEntry<any>> = {
     fps: 60,
     width: 1280,
     height: 720,
+  },
+  VirtualMemoryVideo: {
+    component: VirtualMemoryDemo,
+    spec: virtualMemorySpecSchema.parse(virtualMemoryVideoSpec),
+    calculateMetadata: calcVirtualMemory,
+    fps: 60,
+    width: 1280,
+    height: 720,
+    shell: {
+      targetAspect: "16:9" as const,
+      titleDurationSec: 2,
+      outroDurationSec: 1.5,
+      outro: {
+        phrases: [
+          {
+            id: "vm-outro",
+            text: "TLB：用局部性，把地址翻译变快",
+            startBeat: 0,
+            endBeat: 1.5,
+            entrance: "fade-in",
+            exit: "fade-out",
+            fontSize: 42,
+            fontWeight: 600,
+            anchor: "center",
+            x: 0.5,
+            y: 0.42,
+          },
+        ],
+        beats: [0, 0.5, 1, 1.5],
+      },
+      title: {
+        phrases: [
+          {
+            id: "vm-title",
+            text: "Virtual Memory & TLB",
+            startBeat: 0,
+            endBeat: 2,
+            entrance: "scale-up",
+            exit: "fade-out",
+            fontSize: 56,
+            fontWeight: 700,
+            anchor: "center",
+            x: 0.5,
+            y: 0.42,
+          },
+        ],
+        beats: [0, 1, 2],
+      },
+      subtitles: [
+        { startFrame: 0, endFrame: 90, text: "TLB 是页表的高速缓存" },
+        { startFrame: 90, endFrame: 180, text: "首次访问：TLB miss，触发 page table walk" },
+        { startFrame: 180, endFrame: 270, text: "同页命中：TLB 直接返回物理地址" },
+        { startFrame: 270, endFrame: 360, text: "不同页 miss：旧条目被 LRU 淘汰" },
+        { startFrame: 360, endFrame: 450, text: "页表未映射：触发 page fault" },
+        { startFrame: 450, endFrame: 540, text: "TLB 加速地址翻译，是虚拟内存的关键" },
+      ],
+    },
   },
   TimingDiagramDemo: {
     component: TimingDiagramDemo,
