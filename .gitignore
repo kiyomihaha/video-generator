@@ -25,3 +25,11 @@ public/review-screenshots/
 nul
 .understand-anything/
 .sixth/
+test-frames/
+tmp/
+review-screenshots/
+public/shell-test-frame.png
+
+# Agent/tool configs
+.agents/
+.codegraph/
