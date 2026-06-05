@@ -18,6 +18,7 @@
       "sublabel": "Fetch-decode-execute cycle",
       "preferredQuadrant": "top-left",
       "color": "#38bdf8",
+      "dy": 30,
       "startFrame": 30
     },
     {
@@ -27,6 +28,7 @@
       "sublabel": "~1ns access latency",
       "preferredQuadrant": "bottom-left",
       "color": "#10b981",
+      "dx": -40,
       "startFrame": 75
     },
     {
@@ -36,6 +38,7 @@
       "sublabel": "~10ns, shared among cores",
       "preferredQuadrant": "top-right",
       "color": "#f59e0b",
+      "dx": 40,
       "startFrame": 120
     },
     {
@@ -45,7 +48,17 @@
       "sublabel": "~100ns, gigabytes capacity",
       "preferredQuadrant": "bottom-right",
       "color": "#8b5cf6",
+      "dx": 40,
       "startFrame": 165
+    },
+    {
+      "id": "bypass-label",
+      "targetX": 780, "targetY": 310,
+      "label": "Bypass Path",
+      "sublabel": "Direct memory access",
+      "preferredQuadrant": "top-right",
+      "color": "#ef4444",
+      "startFrame": 285
     }
   ],
   "connectors": [
