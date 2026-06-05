@@ -33,3 +33,4 @@ public/shell-test-frame.png
 # Agent/tool configs
 .agents/
 .codegraph/
+.claude/settings.local.json
