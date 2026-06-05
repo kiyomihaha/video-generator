@@ -129,10 +129,14 @@ function buildElbowSvgPath(c: ResolvedCallout, _frame: number): string {
   if (routing === "hv") {
     // Horizontal-first: target → horizontal to elbow → vertical to label row → horizontal to label
     const midY = labelY + boxHeight / 2;
-    return `M ${targetX} ${targetY} L ${elbowX} ${targetY} L ${elbowX} ${midY} L ${labelX} ${midY}`;
+    // Attach to the edge facing the target
+    const attachX = labelX < targetX ? labelX + boxWidth : labelX;
+    return `M ${targetX} ${targetY} L ${elbowX} ${targetY} L ${elbowX} ${midY} L ${attachX} ${midY}`;
   } else {
     // Vertical-first: target → vertical to elbow → horizontal to label column → vertical to label
     const midX = labelX + boxWidth / 2;
-    return `M ${targetX} ${targetY} L ${targetX} ${elbowY} L ${midX} ${elbowY} L ${midX} ${labelY}`;
+    // Attach to the edge facing the target
+    const attachY = labelY < targetY ? labelY + boxHeight : labelY;
+    return `M ${targetX} ${targetY} L ${targetX} ${elbowY} L ${midX} ${elbowY} L ${midX} ${attachY}`;
   }
 }

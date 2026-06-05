@@ -45,7 +45,7 @@ const SceneContent: React.FC<{ spec: CalloutDemoSpec }> = ({ spec }) => {
             y={n.y + n.h / 2 + 5}
             textAnchor="middle"
             fill={n.color}
-            fontSize={14}
+            fontSize={18}
             fontFamily="Inter, sans-serif"
             fontWeight={600}
           >

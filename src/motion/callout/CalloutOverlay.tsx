@@ -10,8 +10,8 @@ interface Props {
   shadowDefsId?: string;
 }
 
-const LABEL_BG = "#1e293b";
-const LABEL_BORDER = "#334155";
+const LABEL_BG = THEME.canvas.panel;
+const LABEL_BORDER = THEME.canvas.grid;
 
 export const CalloutOverlay: React.FC<Props> = ({ callouts, shadowDefsId = "cs" }) => {
   // Pre-compute wrapped lines for all callouts

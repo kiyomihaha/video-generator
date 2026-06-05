@@ -12,7 +12,7 @@ import { wrappedLineCount, MAX_CHARS_PER_LINE } from "./textUtils";
 
 const CANVAS_W = 1280;
 const CANVAS_H = 720;
-const DEFAULT_BOX_W = 160;
+const DEFAULT_BOX_W = 180;
 const DEFAULT_BOX_H = 72;
 const LABEL_MARGIN = 20;
 const VIEWPORT_PAD = 20;
@@ -170,7 +170,7 @@ export function computeAnnotationLayout(
   const resolvedQuadrants = new Map<string, Quadrant>();
 
   const callouts: ResolvedCallout[] = calloutDefs.map((c, idx) => {
-    const fontSize = c.fontSize ?? 14;
+    const fontSize = c.fontSize ?? 16;
     const boxW = c.boxWidth ?? DEFAULT_BOX_W;
     const boxH = Math.max(c.boxHeight ?? 0, estimateBoxHeight(c.label, c.sublabel, fontSize), DEFAULT_BOX_H);
 
@@ -224,7 +224,7 @@ export function computeAnnotationLayout(
       targetX: c.targetX, targetY: c.targetY,
       label: c.label, sublabel: c.sublabel,
       color: c.color ?? "#f8fafc",
-      fontSize: c.fontSize ?? 14,
+      fontSize: c.fontSize ?? 16,
       boxWidth: boxW, boxHeight: boxH,
       quadrant, routing: c.routing ?? routing,
       startFrame: c.startFrame,
