@@ -4,26 +4,25 @@
   "fps": 60,
   "diagram": {
     "nodes": [
-      { "id": "cpu", "x": 560, "y": 100, "w": 160, "h": 60, "label": "CPU Core", "color": "#38bdf8" },
-      { "id": "l1", "x": 560, "y": 220, "w": 160, "h": 60, "label": "L1 Cache", "color": "#10b981" },
-      { "id": "l2", "x": 560, "y": 340, "w": 160, "h": 60, "label": "L2 Cache", "color": "#f59e0b" },
-      { "id": "memory", "x": 560, "y": 460, "w": 160, "h": 60, "label": "Main Memory", "color": "#8b5cf6" }
+      { "id": "cpu", "x": 560, "y": 140, "w": 160, "h": 60, "label": "CPU Core", "color": "#38bdf8" },
+      { "id": "l1", "x": 560, "y": 260, "w": 160, "h": 60, "label": "L1 Cache", "color": "#10b981" },
+      { "id": "l2", "x": 560, "y": 380, "w": 160, "h": 60, "label": "L2 Cache", "color": "#f59e0b" },
+      { "id": "memory", "x": 560, "y": 500, "w": 160, "h": 60, "label": "Main Memory", "color": "#8b5cf6" }
     ]
   },
   "callouts": [
     {
       "id": "c1",
-      "targetX": 640, "targetY": 130,
+      "targetX": 640, "targetY": 170,
       "label": "Execute Instructions",
       "sublabel": "Fetch-decode-execute cycle",
       "preferredQuadrant": "top-left",
       "color": "#38bdf8",
-      "dy": 30,
       "startFrame": 30
     },
     {
       "id": "c2",
-      "targetX": 640, "targetY": 250,
+      "targetX": 640, "targetY": 290,
       "label": "Fast On-Chip SRAM",
       "sublabel": "~1ns access latency",
       "preferredQuadrant": "bottom-left",
@@ -33,7 +32,7 @@
     },
     {
       "id": "c3",
-      "targetX": 640, "targetY": 370,
+      "targetX": 640, "targetY": 410,
       "label": "Larger But Slower",
       "sublabel": "~10ns, shared among cores",
       "preferredQuadrant": "top-right",
@@ -43,7 +42,7 @@
     },
     {
       "id": "c4",
-      "targetX": 640, "targetY": 490,
+      "targetX": 640, "targetY": 530,
       "label": "DRAM — Main Memory",
       "sublabel": "~100ns, gigabytes capacity",
       "preferredQuadrant": "bottom-right",
@@ -53,19 +52,20 @@
     },
     {
       "id": "bypass-label",
-      "targetX": 780, "targetY": 310,
+      "targetX": 780, "targetY": 400,
       "label": "Bypass Path",
       "sublabel": "Direct memory access",
-      "preferredQuadrant": "top-right",
+      "preferredQuadrant": "bottom-right",
       "color": "#ef4444",
+      "dx": 60,
       "startFrame": 285
     }
   ],
   "connectors": [
     {
       "id": "cpu-to-l1",
-      "fromX": 640, "fromY": 160,
-      "toX": 640, "toY": 220,
+      "fromX": 640, "fromY": 200,
+      "toX": 640, "toY": 260,
       "color": "#38bdf8",
       "direction": "bidirectional",
       "animated": true,
@@ -73,8 +73,8 @@
     },
     {
       "id": "l1-to-l2",
-      "fromX": 640, "fromY": 280,
-      "toX": 640, "toY": 340,
+      "fromX": 640, "fromY": 320,
+      "toX": 640, "toY": 380,
       "color": "#10b981",
       "direction": "bidirectional",
       "animated": true,
@@ -82,8 +82,8 @@
     },
     {
       "id": "l2-to-mem",
-      "fromX": 640, "fromY": 400,
-      "toX": 640, "toY": 460,
+      "fromX": 640, "fromY": 440,
+      "toX": 640, "toY": 500,
       "color": "#f59e0b",
       "direction": "bidirectional",
       "animated": true,
@@ -91,8 +91,8 @@
     },
     {
       "id": "bypass",
-      "fromX": 780, "fromY": 130,
-      "toX": 780, "toY": 490,
+      "fromX": 780, "fromY": 170,
+      "toX": 780, "toY": 530,
       "color": "#ef4444",
       "direction": "forward",
       "animated": true,

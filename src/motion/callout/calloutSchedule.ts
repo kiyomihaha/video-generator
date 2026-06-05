@@ -153,7 +153,10 @@ function clusterTargets(
   return groups;
 }
 
-/** Resolve callout and connector layout. Pure function. */
+/** Resolve callout and connector layout. Pure function.
+ *  Note: quadrant collision avoids reusing the same quadrant for nearby targets,
+ *  but does NOT check final label rectangles against each other, the title, or
+ *  diagram nodes. Use `dx`/`dy` overrides in the spec for manual deconfliction. */
 export function computeAnnotationLayout(
   calloutDefs: CalloutDef[],
   connectorDefs: ConnectorDef[],
