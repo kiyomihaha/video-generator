@@ -29,13 +29,12 @@ function createShellWrappedComponent<TSpec>(
   shell: VideoShellConfig,
   titleFrames: number,
   outroFrames: number,
-  overlapFrames: number,
 ) {
   const displayName = `ShellWrapped(${SceneComponent.displayName ?? SceneComponent.name ?? "Scene"})`;
 
   const Wrapped: React.FC<{ spec: TSpec }> = ({ spec }) => {
     const { durationInFrames } = useVideoConfig();
-    const sceneDuration = durationInFrames - titleFrames - outroFrames + overlapFrames;
+    const sceneDuration = durationInFrames - titleFrames - outroFrames;
     return (
       <VideoShell
         config={shell}
@@ -86,19 +85,18 @@ export const RemotionRoot = () => {
           const dims = compositionDimensions(targetAspect);
           const titleFrames = shell.title ? Math.round((shell.titleDurationSec ?? 3) * entry.fps) : 0;
           const outroFrames = shell.outro ? Math.round((shell.outroDurationSec ?? 3) * entry.fps) : 0;
-          const overlapFrames = shell.title ? Math.round(0.25 * entry.fps) : 0;
 
           const ShellCalcMeta: CalculateMetadataFunction<{ spec: any }> = async (props) => {
             const sceneResult = await entry.calculateMetadata(props);
             const sceneDuration = sceneResult.durationInFrames ?? 300;
             return {
               ...sceneResult,
-              durationInFrames: titleFrames + sceneDuration + outroFrames - overlapFrames,
+              durationInFrames: titleFrames + sceneDuration + outroFrames,
             };
           };
 
           const ShellComponent = createShellWrappedComponent(
-            entry.component, shell, titleFrames, outroFrames, overlapFrames,
+            entry.component, shell, titleFrames, outroFrames,
           );
 
           return (

@@ -33,22 +33,22 @@ export const VirtualMemoryScene: React.FC<{ spec: VirtualMemorySpec }> = ({ spec
 
   // Layout constants
   const TLB_X = 20;
-  const TLB_Y = 70;
-  const TLB_W = 200;
-  const TLB_CELL_H = 44;
-  const TLB_GAP = 4;
+  const TLB_Y = 110;
+  const TLB_W = 220;
+  const TLB_CELL_H = 52;
+  const TLB_GAP = 5;
 
-  const VA_X = 240;
-  const VA_Y = 70;
-  const VA_W = 360;
-  const VA_H = 50;
+  const VA_X = 260;
+  const VA_Y = 60;
+  const VA_W = 400;
+  const VA_H = 55;
 
-  const PT_START_X = 240;
-  const PT_Y = 180;
-  const PT_CELL_W = 52;
-  const PT_CELL_H = 36;
-  const PT_GAP = 3;
-  const PT_LEVEL_GAP = 40;
+  const PT_START_X = 260;
+  const PT_Y = 240;
+  const PT_CELL_W = 62;
+  const PT_CELL_H = 44;
+  const PT_GAP = 4;
+  const PT_LEVEL_GAP = 50;
 
   // Bezier curve for walk path
   const walkPaths = state.currentAccess?.entry.walkPath ?? [];
@@ -80,8 +80,13 @@ export const VirtualMemoryScene: React.FC<{ spec: VirtualMemorySpec }> = ({ spec
 
         {/* Access info */}
         {state.currentAccess && (
-          <text x={VW / 2} y={46} textAnchor="middle" fill={T.muted} fontSize={12} fontFamily="JetBrains Mono, SF Mono, monospace">
+          <text x={VW / 2} y={42} textAnchor="middle" fill={T.muted} fontSize={13} fontFamily="JetBrains Mono, SF Mono, monospace">
             Access: {state.currentAccess.entry.accessId} ({state.currentAccess.entry.virtualAddress}) — Cycle {state.currentAccess.entry.cycle}
+          </text>
+        )}
+        {state.currentAccess && state.currentAccess.entry.label && (
+          <text x={VW / 2} y={56} textAnchor="middle" fill={T.bright} fontSize={12} fontFamily="Inter, sans-serif" fontStyle="italic">
+            {state.currentAccess.entry.label}
           </text>
         )}
 
@@ -100,12 +105,12 @@ export const VirtualMemoryScene: React.FC<{ spec: VirtualMemorySpec }> = ({ spec
         )}
 
         {/* TLB Panel */}
-        <text x={TLB_X + TLB_W / 2} y={TLB_Y - 8} textAnchor="middle" fill={T.bright} fontSize={12} fontFamily="Inter, sans-serif" fontWeight="bold">
+        <text x={TLB_X + TLB_W / 2} y={TLB_Y - 10} textAnchor="middle" fill={T.bright} fontSize={14} fontFamily="Inter, sans-serif" fontWeight="bold">
           TLB ({tlbSets}×{tlbAssociativity})
         </text>
 
         {/* TLB header */}
-        <text x={TLB_X + 8} y={TLB_Y + 4} fill={T.muted} fontSize={9} fontFamily="Inter, sans-serif">
+        <text x={TLB_X + 8} y={TLB_Y + 6} fill={T.muted} fontSize={10} fontFamily="Inter, sans-serif">
           Set
         </text>
         {Array.from({ length: tlbAssociativity }, (_, wi) => (
@@ -115,7 +120,7 @@ export const VirtualMemoryScene: React.FC<{ spec: VirtualMemorySpec }> = ({ spec
             y={TLB_Y + 4}
             textAnchor="middle"
             fill={T.muted}
-            fontSize={9}
+            fontSize={10}
             fontFamily="Inter, sans-serif"
           >
             Way {wi}
@@ -156,16 +161,17 @@ export const VirtualMemoryScene: React.FC<{ spec: VirtualMemorySpec }> = ({ spec
 
         {/* Page Tables */}
         {state.pageTables.map((pt, li) => {
-          const ptX = PT_START_X + li * (PT_CELL_W * 8 + PT_LEVEL_GAP + 60);
+          const ptBaseX = PT_START_X + li * (PT_CELL_W * 8 + PT_LEVEL_GAP + 60);
           const maxCols = Math.min(8, entriesPerLevel[li]);
           const ptW = maxCols * (PT_CELL_W + PT_GAP);
+          const ptX = Math.min(ptBaseX, VW - ptW - 20);
 
           return (
             <g key={`pt-${li}`}>
-              <text x={ptX + ptW / 2} y={PT_Y - 8} textAnchor="middle" fill={T.bright} fontSize={12} fontFamily="Inter, sans-serif" fontWeight="bold">
+              <text x={ptX + ptW / 2} y={PT_Y - 10} textAnchor="middle" fill={T.bright} fontSize={14} fontFamily="Inter, sans-serif" fontWeight="bold">
                 Page Table L{li + 1}
               </text>
-              <text x={ptX + ptW / 2} y={PT_Y + 4} textAnchor="middle" fill={T.muted} fontSize={9} fontFamily="Inter, sans-serif">
+              <text x={ptX + ptW / 2} y={PT_Y + 6} textAnchor="middle" fill={T.muted} fontSize={10} fontFamily="Inter, sans-serif">
                 {entriesPerLevel[li]} entries
               </text>
 
@@ -192,9 +198,12 @@ export const VirtualMemoryScene: React.FC<{ spec: VirtualMemorySpec }> = ({ spec
           const fromX = TLB_X + TLB_W + 10;
           const fromY = TLB_Y + 14 + (state.currentAccess!.entry.tlbSet) * (TLB_CELL_H + TLB_GAP) + TLB_CELL_H / 2;
           const ptBaseX = PT_START_X + step.level * (PT_CELL_W * 8 + PT_LEVEL_GAP + 60);
+          const maxCols = Math.min(8, entriesPerLevel[step.level]);
+          const ptW = maxCols * (PT_CELL_W + PT_GAP);
+          const ptClampedX = Math.min(ptBaseX, VW - ptW - 20);
           const col = step.entryIndex % 8;
           const row = Math.floor(step.entryIndex / 8);
-          const toX = ptBaseX + col * (PT_CELL_W + PT_GAP) + PT_CELL_W / 2;
+          const toX = ptClampedX + col * (PT_CELL_W + PT_GAP) + PT_CELL_W / 2;
           const toY = PT_Y + 16 + row * (PT_CELL_H + PT_GAP) + PT_CELL_H / 2;
           const midX = (fromX + toX) / 2;
 
@@ -204,33 +213,69 @@ export const VirtualMemoryScene: React.FC<{ spec: VirtualMemorySpec }> = ({ spec
               d={`M ${fromX} ${fromY} C ${midX} ${fromY}, ${midX} ${toY}, ${toX} ${toY}`}
               fill="none"
               stroke={isFault ? THEME.status.miss : VM.walk}
-              strokeWidth={1.5}
-              strokeDasharray={isFault ? "4 2" : "none"}
+              strokeWidth={2.5}
+              strokeDasharray={isFault ? "6 3" : "none"}
               markerEnd={isFault ? "url(#vm-arrow-fault)" : "url(#vm-arrow)"}
-              opacity={0.7}
+              opacity={0.9}
             />
           );
         })}
 
-        {/* Result badge */}
+        {/* Page fault PTE callout — persistent during walk + result phases */}
+        {state.currentAccess && (state.currentAccess.phase === "walk" || state.currentAccess.phase === "result") && (
+          (() => {
+            const faultStep = walkPaths.find(s => s.result === "fault");
+            if (!faultStep) return null;
+            const ptBaseX = PT_START_X + faultStep.level * (PT_CELL_W * 8 + PT_LEVEL_GAP + 60);
+            const maxCols = Math.min(8, entriesPerLevel[faultStep.level]);
+            const ptW = maxCols * (PT_CELL_W + PT_GAP);
+            const ptClampedX = Math.min(ptBaseX, VW - ptW - 20);
+            const col = faultStep.entryIndex % 8;
+            const row = Math.floor(faultStep.entryIndex / 8);
+            const pteX = ptClampedX + col * (PT_CELL_W + PT_GAP) + PT_CELL_W / 2;
+            const pteY = PT_Y + 16 + row * (PT_CELL_H + PT_GAP) + PT_CELL_H / 2;
+            const calloutX = Math.min(pteX + 80, VW - 140);
+            const calloutY = pteY - 20;
+            const elbowX = pteX + 20;
+            const elbowY = pteY;
+
+            return (
+              <g>
+                <path
+                  d={`M ${elbowX} ${elbowY} L ${calloutX} ${elbowY} L ${calloutX} ${calloutY} L ${calloutX + 10} ${calloutY}`}
+                  fill="none" stroke={THEME.status.miss} strokeWidth={1.5}
+                />
+                <rect x={calloutX + 10} y={calloutY - 14} width={118} height={28}
+                  rx={14} ry={14} fill={THEME.status.miss} fillOpacity={0.85} />
+                <text x={calloutX + 10 + 59} y={calloutY + 5}
+                  textAnchor="middle" fill={T.onColor} fontSize={12}
+                  fontFamily="Inter, sans-serif" fontWeight="bold">
+                  ⚡ PAGE FAULT
+                </text>
+              </g>
+            );
+          })()
+        )}
         {state.currentAccess && state.currentAccess.phase === "result" && (
           <g>
             <rect
-              x={VW / 2 - 70} y={VH - 80}
-              width={140} height={32}
-              rx={16} ry={16}
+              x={880} y={72}
+              width={200} height={36}
+              rx={18} ry={18}
               fill={resultColor}
-              fillOpacity={0.8}
+              fillOpacity={0.9}
+              stroke={resultColor}
+              strokeWidth={2}
             />
             <text
-              x={VW / 2} y={VH - 60}
+              x={980} y={95}
               textAnchor="middle"
               fill={T.onColor}
-              fontSize={13}
+              fontSize={14}
               fontFamily="Inter, sans-serif"
               fontWeight="bold"
             >
-              {result === "tlb-hit" ? "TLB HIT" : result === "page-fault" ? "PAGE FAULT" : "TLB MISS → Walk"}
+              {result === "tlb-hit" ? "✓ TLB HIT" : result === "page-fault" ? "✗ PAGE FAULT" : "↻ Walk → Fill"}
             </text>
           </g>
         )}
@@ -241,9 +286,9 @@ export const VirtualMemoryScene: React.FC<{ spec: VirtualMemorySpec }> = ({ spec
           currentCycle={state.currentAccess?.entry.cycle ?? 0}
           totalCycles={schedule.totalCycles}
           x={80}
-          y={VH - 50}
+          y={VH - 55}
           w={VW - 160}
-          h={40}
+          h={42}
         />
       </svg>
     </AbsoluteFill>

@@ -72,6 +72,7 @@ export interface VMTimelineEntry {
   walkPath: WalkStep[];
   physicalFrame: number | null;
   evictedTlbEntry: { set: number; way: number; vpn: number } | null;
+  label?: string;
 }
 
 export interface WalkStep {

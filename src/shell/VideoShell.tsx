@@ -130,12 +130,12 @@ export const VideoShell: React.FC<VideoShellProps> = ({
           )}
         </Sequence>
       )}
-      {/* z-3: Subtitle overlay (HTML) — timed to scene, not global timeline */}
+      {/* z-3: Subtitle overlay (HTML) — timed to match scene (offset by overlap) */}
       {config.subtitles && config.subtitles.length > 0 && (
         <div style={{ position: "absolute", inset: 0, zIndex: 3, pointerEvents: "none" }}>
           <Sequence
-            from={titleFrames}
-            durationInFrames={sceneDurationFrames}
+            from={titleFrames - overlapFrames}
+            durationInFrames={sceneDurationFrames + overlapFrames}
             name="subtitles">
             <SubtitleOverlay
               subtitles={config.subtitles}

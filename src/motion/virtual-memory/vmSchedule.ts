@@ -121,6 +121,7 @@ export function computeVMSchedule(spec: VirtualMemorySpec): VMSchedule {
         walkPath: [],
         physicalFrame: tlbSet[tlbWay!].physicalFrame,
         evictedTlbEntry: null,
+        label: access.label,
       });
       continue;
     }
@@ -218,6 +219,7 @@ export function computeVMSchedule(spec: VirtualMemorySpec): VMSchedule {
       walkPath,
       physicalFrame: resolvedPfn,
       evictedTlbEntry,
+      label: access.label,
     });
   }
 
