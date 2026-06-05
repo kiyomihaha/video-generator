@@ -87,7 +87,9 @@ export interface LALayerState {
 }
 
 export interface LADataFlowRender {
+  fromX: number;
   fromY: number;
+  toX: number;
   toY: number;
   progress: number;
   direction: "up" | "down";

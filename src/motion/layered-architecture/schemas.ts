@@ -40,6 +40,7 @@ export const layeredArchitectureSpecSchema = z
     timeline: z.array(timelineEventSchema).min(1),
     beats: z.array(z.number().min(0)).min(1),
     buildOrder: z.enum(["top-down", "bottom-up"]).optional(),
+    staggerEnter: z.boolean().optional(),
     layerHeight: z.number().int().positive().optional(),
     layerWidth: z.number().int().positive().optional(),
     layerGap: z.number().int().min(0).optional(),
@@ -81,6 +82,15 @@ export const layeredArchitectureSpecSchema = z
       return true;
     },
     { message: "Timeline must have at least one enter event", path: ["timeline"] },
+  )
+  .refine(
+    (spec) => {
+      for (const ev of spec.timeline) {
+        if (ev.durationBeats && ev.beat + ev.durationBeats >= spec.beats.length) return false;
+      }
+      return true;
+    },
+    { message: "durationBeats extends beyond the beat array", path: ["timeline"] },
   )
   .refine(
     (spec) => {

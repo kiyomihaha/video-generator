@@ -17,6 +17,7 @@ import timingDiagramSpec from "../../public/specs/timing-diagram-demo.json";
 import textEmphasisSpec from "../../public/specs/text-emphasis-demo.json";
 import cwlSpec from "../../public/specs/cwl-demo.json";
 import laSpec from "../../public/specs/layered-architecture-demo.json";
+import calloutSpec from "../../public/specs/callout-demo.json";
 
 import { digitalTimingSpecSchema } from "../motion/primitives/schemas";
 import { pipelineSpecSchema } from "../motion/pipeline/schemas";
@@ -39,6 +40,7 @@ import { TimingDiagramDemo } from "../timing-diagram-demo/index";
 import { TextEmphasisDemo } from "../text-emphasis-demo/index";
 import { CircuitWaveformDemo } from "../circuit-waveform-demo/index";
 import { LayeredArchitectureDemo } from "../layered-architecture-demo/index";
+import { CalloutDemo } from "../callout-demo/index";
 
 import type { DigitalTimingSpec } from "../motion/primitives/types";
 import type { PipelineSpec } from "../motion/pipeline/types";
@@ -53,6 +55,9 @@ import type { CircuitWaveformLinkerAuthoring } from "../motion/linker/types";
 import { layeredArchitectureSpecSchema } from "../motion/layered-architecture/schemas";
 import type { LayeredArchitectureSpec } from "../motion/layered-architecture/types";
 import { computeLASchedule } from "../motion/layered-architecture/laSchedule";
+import { calloutDemoSpecSchema } from "../callout-demo/schemas";
+import type { CalloutDemoSpec } from "../callout-demo/types";
+import type { VideoShellConfig } from "../shell/types";
 
 interface SceneEntry<TSpec> {
   component: ComponentType<{ spec: TSpec }>;
@@ -61,6 +66,7 @@ interface SceneEntry<TSpec> {
   fps: number;
   width: number;
   height: number;
+  shell?: VideoShellConfig;
 }
 
 // DigitalTiming: duration from spec.totalDuration * spec.fps
@@ -110,6 +116,11 @@ const calcCircuitWaveform: CalculateMetadataFunction<{ spec: CircuitWaveformLink
 const calcLayeredArchitecture: CalculateMetadataFunction<{ spec: LayeredArchitectureSpec }> = ({ props }) => {
   const schedule = computeLASchedule(props.spec, 60);
   return { durationInFrames: schedule.totalFrames };
+};
+
+// CalloutDemo: duration from spec
+const calcCalloutDemo: CalculateMetadataFunction<{ spec: CalloutDemoSpec }> = ({ props }) => {
+  return { durationInFrames: props.spec.durationInFrames };
 };
 
 // Validate all specs at module load — fail-fast on bad JSON
@@ -222,6 +233,41 @@ export const sceneRegistry: Record<string, SceneEntry<any>> = {
     component: LayeredArchitectureDemo,
     spec: layeredArchitectureSpecSchema.parse(laSpec),
     calculateMetadata: calcLayeredArchitecture,
+    fps: 60,
+    width: 1280,
+    height: 720,
+    shell: {
+      targetAspect: "16:9" as const,
+      titleDurationSec: 2,
+      title: {
+        phrases: [
+          {
+            id: "title-main",
+            text: "Layered Architecture",
+            startBeat: 0,
+            endBeat: 2,
+            entrance: "scale-up",
+            exit: "fade-out",
+            fontSize: 64,
+            fontWeight: 700,
+            anchor: "center",
+            x: 0.5,
+            y: 0.42,
+          },
+        ],
+        beats: [0, 1, 2],
+      },
+      subtitles: [
+        { startFrame: 0, endFrame: 180, text: "AI 系统的五层架构" },
+        { startFrame: 180, endFrame: 360, text: "从基础设施到应用层的数据流" },
+        { startFrame: 360, endFrame: 540, text: "Agent 编排与模型推理的协同" },
+      ],
+    },
+  },
+  CalloutDemo: {
+    component: CalloutDemo,
+    spec: calloutDemoSpecSchema.parse(calloutSpec),
+    calculateMetadata: calcCalloutDemo,
     fps: 60,
     width: 1280,
     height: 720,

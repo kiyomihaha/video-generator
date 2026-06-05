@@ -1,12 +1,11 @@
 import React, { useMemo } from "react";
+import { useVideoConfig } from "remotion";
 import { LayeredArchitectureScene } from "../scenes/LayeredArchitectureScene";
 import { computeLASchedule } from "../motion/layered-architecture/laSchedule";
-import { layeredArchitectureSpecSchema } from "../motion/layered-architecture/schemas";
-import spec from "../../public/specs/layered-architecture-demo.json";
+import type { LayeredArchitectureSpec } from "../motion/layered-architecture/types";
 
-const parsed = layeredArchitectureSpecSchema.parse(spec);
-
-export const LayeredArchitectureDemo: React.FC = () => {
-  const schedule = useMemo(() => computeLASchedule(parsed, 60), []);
+export const LayeredArchitectureDemo: React.FC<{ spec: LayeredArchitectureSpec }> = ({ spec }) => {
+  const fps = useVideoConfig().fps;
+  const schedule = useMemo(() => computeLASchedule(spec, fps), [spec, fps]);
   return <LayeredArchitectureScene schedule={schedule} />;
 };

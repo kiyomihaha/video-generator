@@ -12,7 +12,6 @@ import { THEME } from "../../theme";
 
 const TOP_MARGIN = 80;
 const BOTTOM_MARGIN = 80;
-const DESCRIPTION_MIN_HEIGHT = 68;
 
 const LAYER_PALETTE: string[] = [
   THEME.layers.layer1,
@@ -51,16 +50,16 @@ export function computeLASchedule(spec: LayeredArchitectureSpec, fps: number): L
   const layerWidth = spec.layerWidth ?? 600;
 
   // Fps-derived animation durations
-  const enterFrames = Math.round(0.35 * fps);
+  const enterFrames = Math.round(0.25 * fps);
   const exitFrames = Math.round(0.3 * fps);
   const flowFrames = Math.round(1.0 * fps);
 
   // Compute beat-to-frame conversion
   const beatFrames = spec.beats.map((b) => Math.round(b * fps));
-
-  // Total frames = last beat frame + 1 second of padding
   const lastBeatFrame = beatFrames[beatFrames.length - 1];
-  const totalFrames = lastBeatFrame + Math.round(1 * fps);
+
+  // Total frames tracked through event resolution, padded at the end
+  let maxEndFrame = lastBeatFrame;
 
   // Compute layer Y positions (top-to-bottom stacking)
   const buildOrder = spec.buildOrder ?? "bottom-up";
@@ -87,7 +86,8 @@ export function computeLASchedule(spec: LayeredArchitectureSpec, fps: number): L
     };
   });
 
-  // Resolve timeline events to frames
+  // Resolve timeline events to frames, tracking max endFrame
+  maxEndFrame = lastBeatFrame;
   const events: ResolvedTimelineEvent[] = spec.timeline
     .map((ev) => {
       const frame = beatFrames[ev.beat];
@@ -99,16 +99,12 @@ export function computeLASchedule(spec: LayeredArchitectureSpec, fps: number): L
         case "enter":
           durationFrames = enterFrames;
           if (spec.staggerEnter) {
-            const staggerFrames = Math.round(0.08 * fps);
+            const staggerFrames = Math.round(0.05 * fps);
             const layerIdx = spec.layers.findIndex((l) => l.id === ev.layerId);
-            if (layerIdx > 0) {
-              const buildOrder = spec.buildOrder ?? "bottom-up";
-              const visualIdx =
-                buildOrder === "bottom-up"
-                  ? spec.layers.length - 1 - layerIdx
-                  : layerIdx;
-              adjustedFrame = frame + staggerFrames * visualIdx;
-            }
+            // Both build orders: layer[0] enters first
+            // bottom-up: layer[0] is foundation (bottom visual), enters first
+            // top-down: layer[0] is topmost visual, enters first
+            adjustedFrame = frame + staggerFrames * layerIdx;
           }
           break;
         case "exit":
@@ -119,25 +115,25 @@ export function computeLASchedule(spec: LayeredArchitectureSpec, fps: number): L
           break;
         case "callout":
           if (ev.durationBeats) {
-            durationFrames = Math.round(ev.durationBeats * fps);
+            durationFrames = beatFrames[ev.beat + ev.durationBeats] - frame;
           }
-          // Default: persistent until restore (endFrame stays 0)
           break;
         case "highlight":
         case "dim-others":
         case "focus":
           if (ev.durationBeats) {
-            durationFrames = Math.round(ev.durationBeats * fps);
+            durationFrames = beatFrames[ev.beat + ev.durationBeats] - frame;
           }
           break;
         case "restore":
-          durationFrames = 12; // quick fade
+          durationFrames = 12;
           break;
       }
 
       if (durationFrames > 0) {
         endFrame = adjustedFrame + durationFrames;
       }
+      if (endFrame > maxEndFrame) maxEndFrame = endFrame;
 
       return {
         type: ev.type,
@@ -155,7 +151,7 @@ export function computeLASchedule(spec: LayeredArchitectureSpec, fps: number): L
   return {
     layers,
     events,
-    totalFrames,
+    totalFrames: maxEndFrame + Math.round(1 * fps),
     fps,
     width,
     height,

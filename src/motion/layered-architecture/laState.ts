@@ -12,13 +12,13 @@ import type {
 import { clamp01, easeOutCubic, easeOutQuart } from "../utils";
 
 function computeModifierState(events: ResolvedTimelineEvent[], frame: number) {
-  // Find the last completed restore boundary
-  let restoreBoundary = -1;
-  for (let i = 0; i < events.length; i++) {
-    if (events[i].type === "restore" && frame >= events[i].endFrame) {
-      restoreBoundary = i;
-    }
-  }
+  // Track the latest completed restore frame (frame-based, not index-based)
+  const lastCompletedRestoreFrame = Math.max(
+    -1,
+    ...events
+      .filter((e) => e.type === "restore" && frame >= e.endFrame)
+      .map((e) => e.frame),
+  );
 
   // Detect active restore animation
   let inRestoreAnim = false;
@@ -34,12 +34,24 @@ function computeModifierState(events: ResolvedTimelineEvent[], frame: number) {
   const dimExempt = new Set<string>();
   let dimActive = false;
 
-  for (let i = restoreBoundary + 1; i < events.length; i++) {
-    const ev = events[i];
+  for (const ev of events) {
     if (ev.frame > frame) break;
 
+    // Defer past overlapping restores (iterate for chained restores)
+    let effStart = ev.frame;
+    for (const rev of events) {
+      if (rev.type === "restore" && rev.frame <= effStart && rev.endFrame > effStart) {
+        effStart = rev.endFrame;
+      }
+    }
+    // Skip events whose deferred start is before the last completed restore
+    if (lastCompletedRestoreFrame >= 0 && effStart < lastCompletedRestoreFrame) continue;
+
     if (ev.type === "highlight" || ev.type === "focus") {
-      if (ev.endFrame > 0 && frame >= ev.endFrame) continue;
+      const delay = effStart - ev.frame;
+      const effEnd = ev.endFrame > 0 ? ev.endFrame + delay : 0;
+      if (effEnd > 0 && frame >= effEnd) continue;
+
       const targets = ev.layerIds ?? (ev.layerId ? [ev.layerId] : []);
       for (const id of targets) highlighted.add(id);
       if (ev.type === "focus") {
@@ -47,21 +59,24 @@ function computeModifierState(events: ResolvedTimelineEvent[], frame: number) {
         for (const id of targets) dimExempt.add(id);
       }
     } else if (ev.type === "dim-others") {
-      if (ev.endFrame > 0 && frame >= ev.endFrame) continue;
+      const delay = effStart - ev.frame;
+      const effEnd = ev.endFrame > 0 ? ev.endFrame + delay : 0;
+      if (effEnd > 0 && frame >= effEnd) continue;
+
       const targets = ev.layerIds ?? (ev.layerId ? [ev.layerId] : []);
       dimActive = true;
       for (const id of targets) dimExempt.add(id);
     }
   }
 
-  return { highlighted, dimExempt, dimActive, inRestoreAnim, restoreBoundary };
+  return { highlighted, dimExempt, dimActive, inRestoreAnim, lastCompletedRestoreFrame };
 }
 
 export function computeLAState(schedule: LASchedule, frame: number): LAState {
   const events = schedule.events;
 
   // Compute modifier state (highlight, dim, restore)
-  const { highlighted, dimExempt, dimActive, inRestoreAnim, restoreBoundary } = computeModifierState(events, frame);
+  const { highlighted, dimExempt, dimActive, inRestoreAnim, lastCompletedRestoreFrame } = computeModifierState(events, frame);
 
   // Per-layer state
   const layers: LALayerState[] = schedule.layers.map((layer) => {
@@ -70,48 +85,41 @@ export function computeLAState(schedule: LASchedule, frame: number): LAState {
     let entered = false;
     let visible = false;
 
-    // Find enter/exit events for this layer — use LAST matching event
-    const enterEvs = events.filter(
-      (e) => e.type === "enter" && e.layerId === layer.id && e.frame <= frame,
-    );
-    const enterEv = enterEvs.length > 0 ? enterEvs[enterEvs.length - 1] : undefined;
-    const exitEvs = events.filter(
-      (e) => e.type === "exit" && e.layerId === layer.id && e.frame <= frame,
-    );
-    const exitEv = exitEvs.length > 0 ? exitEvs[exitEvs.length - 1] : undefined;
+    // Find the most recent lifecycle event (enter/exit) for this layer
+    const lifecycleEvents = events
+      .filter((e) => (e.type === "enter" || e.type === "exit") && e.layerId === layer.id && e.frame <= frame)
+      .sort((a, b) => b.frame - a.frame);
+    const lastLifecycle = lifecycleEvents[0];
 
-    // ── Enter animation ──
-    if (enterEv) {
-      const elapsed = frame - enterEv.frame;
-      const duration = enterEv.endFrame - enterEv.frame;
+    // ── Lifecycle animation based on most recent event ──
+    if (lastLifecycle) {
+      const elapsed = frame - lastLifecycle.frame;
+      const duration = lastLifecycle.endFrame - lastLifecycle.frame;
 
-      if (elapsed < duration) {
-        const progress = clamp01(elapsed / duration);
-        const eased = easeOutQuart(progress);
-        opacity = eased;
-        translateY = (1 - eased) * 40;
-        visible = true;
+      if (lastLifecycle.type === "enter") {
+        if (elapsed < duration) {
+          const progress = clamp01(elapsed / duration);
+          const eased = easeOutQuart(progress);
+          opacity = eased;
+          translateY = (1 - eased) * 40;
+          visible = true;
+        } else {
+          opacity = 1;
+          translateY = 0;
+          entered = true;
+          visible = true;
+        }
       } else {
-        opacity = 1;
-        translateY = 0;
-        entered = true;
-        visible = true;
-      }
-    }
-
-    // ── Exit animation (overrides enter) ──
-    if (exitEv) {
-      const elapsed = frame - exitEv.frame;
-      const duration = exitEv.endFrame - exitEv.frame;
-
-      if (elapsed < duration) {
-        const progress = clamp01(elapsed / duration);
-        const eased = easeOutCubic(progress);
-        opacity = 1 - eased;
-        translateY = eased * 40;
-      } else {
-        opacity = 0;
-        visible = false;
+        // exit
+        if (elapsed < duration) {
+          const progress = clamp01(elapsed / duration);
+          const eased = easeOutCubic(progress);
+          opacity = 1 - eased;
+          translateY = eased * 40;
+        } else {
+          opacity = 0;
+          visible = false;
+        }
       }
     }
 
@@ -148,37 +156,56 @@ export function computeLAState(schedule: LASchedule, frame: number): LAState {
       ? easeOutCubic(clamp01(elapsed / animDuration))
       : 1;
 
+    const flowX = (schedule.width - schedule.layerWidth) / 2 + schedule.layerWidth + 20;
+
     dataFlows.push({
+      fromX: flowX,
       fromY: fromLayer.y + schedule.layerHeight / 2,
+      toX: flowX,
       toY: toLayer.y + schedule.layerHeight / 2,
       progress,
       direction: ev.direction ?? "up",
     });
   }
 
-  // ── Callout events (persistent until restore) ──
+  // ── Callout events (hidden during restore animation, removed after restore completes) ──
   const callouts: LACalloutRender[] = [];
-  for (let i = 0; i < events.length; i++) {
-    const ev = events[i];
-    if (ev.type !== "callout") continue;
-    if (restoreBoundary >= 0 && i <= restoreBoundary) continue;
-    if (frame < ev.frame) continue;
-    if (ev.endFrame > 0 && frame >= ev.endFrame) continue;
+  if (!inRestoreAnim) {
+    for (const ev of events) {
+      if (ev.type !== "callout") continue;
+      if (frame < ev.frame) continue;
 
-    const layer = schedule.layers.find((l) => l.id === ev.layerId);
-    if (!layer) continue;
+      const layer = schedule.layers.find((l) => l.id === ev.layerId);
+      if (!layer) continue;
 
-    const elapsed = frame - ev.frame;
-    const fadeInDuration = Math.round(0.2 * schedule.fps);
-    const opacity = easeOutCubic(clamp01(elapsed / fadeInDuration));
+      // Defer fade start to after any overlapping restore event ends (iterate for chained restores)
+      let effectiveStart = ev.frame;
+      for (const rev of events) {
+        if (rev.type === "restore" && rev.frame <= effectiveStart && rev.endFrame > effectiveStart) {
+          effectiveStart = rev.endFrame;
+        }
+      }
 
-    callouts.push({
-      layerId: ev.layerId!,
-      label: ev.label ?? "",
-      opacity,
-      x: 40,
-      y: layer.y + schedule.layerHeight / 2,
-    });
+      // Skip callouts whose deferred start is before the last completed restore
+      if (lastCompletedRestoreFrame >= 0 && effectiveStart < lastCompletedRestoreFrame) continue;
+
+      // Shift endFrame by the same deferral so visible duration is preserved
+      const delay = effectiveStart - ev.frame;
+      const effectiveEndFrame = ev.endFrame > 0 ? ev.endFrame + delay : 0;
+      if (effectiveEndFrame > 0 && frame >= effectiveEndFrame) continue;
+
+      const elapsed = frame - effectiveStart;
+      const fadeInDuration = Math.round(0.2 * schedule.fps);
+      const opacity = easeOutCubic(clamp01(elapsed / fadeInDuration));
+
+      callouts.push({
+        layerId: ev.layerId!,
+        label: ev.label ?? "",
+        opacity,
+        x: 40,
+        y: layer.y + schedule.layerHeight / 2,
+      });
+    }
   }
 
   return { layers, dataFlows, callouts };
