@@ -1,0 +1,14 @@
+{
+  "id": "legend-demo",
+  "title": "Cache Levels",
+  "position": "top-right",
+  "items": [
+    { "id": "l1", "label": "L1 Cache", "color": "#10b981", "symbol": "square" },
+    { "id": "l2", "label": "L2 Cache", "color": "#f59e0b", "symbol": "square" },
+    { "id": "mem", "label": "Main Memory", "color": "#8b5cf6", "symbol": "circle" },
+    { "id": "cpu", "label": "CPU Core", "color": "#38bdf8", "symbol": "dash" }
+  ],
+  "activeTokens": ["l1", "cpu"],
+  "startFrame": 30,
+  "endFrame": 210
+}

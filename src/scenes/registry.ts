@@ -19,6 +19,7 @@ import textEmphasisSpec from "../../public/specs/text-emphasis-demo.json";
 import cwlSpec from "../../public/specs/cwl-demo.json";
 import laSpec from "../../public/specs/layered-architecture-demo.json";
 import calloutSpec from "../../public/specs/callout-demo.json";
+import legendSpec from "../../public/specs/legend-demo.json";
 
 import { digitalTimingSpecSchema } from "../motion/primitives/schemas";
 import { pipelineSpecSchema } from "../motion/pipeline/schemas";
@@ -42,6 +43,7 @@ import { TextEmphasisDemo } from "../text-emphasis-demo/index";
 import { CircuitWaveformDemo } from "../circuit-waveform-demo/index";
 import { LayeredArchitectureDemo } from "../layered-architecture-demo/index";
 import { CalloutDemo } from "../callout-demo/index";
+import { LegendDemo } from "../legend-demo/index";
 
 import type { DigitalTimingSpec } from "../motion/primitives/types";
 import type { PipelineSpec } from "../motion/pipeline/types";
@@ -58,6 +60,8 @@ import type { LayeredArchitectureSpec } from "../motion/layered-architecture/typ
 import { computeLASchedule } from "../motion/layered-architecture/laSchedule";
 import { calloutDemoSpecSchema } from "../callout-demo/schemas";
 import type { CalloutDemoSpec } from "../callout-demo/types";
+import { legendSpecSchema } from "../motion/legend/schemas";
+import type { LegendSpec } from "../motion/legend/types";
 import type { VideoShellConfig } from "../shell/types";
 
 interface SceneEntry<TSpec> {
@@ -122,6 +126,11 @@ const calcLayeredArchitecture: CalculateMetadataFunction<{ spec: LayeredArchitec
 // CalloutDemo: duration from spec
 const calcCalloutDemo: CalculateMetadataFunction<{ spec: CalloutDemoSpec }> = ({ props }) => {
   return { durationInFrames: props.spec.durationInFrames };
+};
+
+// LegendDemo: duration from spec.endFrame
+const calcLegendDemo: CalculateMetadataFunction<{ spec: LegendSpec }> = ({ props }) => {
+  return { durationInFrames: props.spec.endFrame };
 };
 
 // Validate all specs at module load — fail-fast on bad JSON
@@ -326,6 +335,14 @@ export const sceneRegistry: Record<string, SceneEntry<any>> = {
     component: CalloutDemo,
     spec: calloutDemoSpecSchema.parse(calloutSpec),
     calculateMetadata: calcCalloutDemo,
+    fps: 60,
+    width: 1280,
+    height: 720,
+  },
+  LegendDemo: {
+    component: LegendDemo,
+    spec: legendSpecSchema.parse(legendSpec),
+    calculateMetadata: calcLegendDemo,
     fps: 60,
     width: 1280,
     height: 720,
