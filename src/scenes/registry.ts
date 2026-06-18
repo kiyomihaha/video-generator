@@ -368,7 +368,7 @@ export const sceneRegistry: Record<string, SceneEntry<any>> = {
     shell: {
       targetAspect: "16:9" as const,
       titleDurationSec: 2,
-      outroDurationSec: 1.5,
+      outroDurationSec: 0.5,  // Short fade-out only, Summary handles the ending
       title: {
         phrases: [
           {
@@ -386,24 +386,6 @@ export const sceneRegistry: Record<string, SceneEntry<any>> = {
           },
         ],
         beats: [0, 1, 2],
-      },
-      outro: {
-        phrases: [
-          {
-            id: "outro",
-            text: "数字世界的边界",
-            startBeat: 0,
-            endBeat: 1,
-            entrance: "fade-in",
-            exit: "fade-out",
-            fontSize: 36,
-            fontWeight: 500,
-            anchor: "center",
-            x: 0.5,
-            y: 0.42,
-          },
-        ],
-        beats: [0, 0.5, 1],
       },
       subtitles: [
         // Segment 1: 9.60s (0→594)
@@ -439,9 +421,9 @@ export const sceneRegistry: Record<string, SceneEntry<any>> = {
         { startFrame: 7310, endFrame: 7620, text: "而是 I/O 边界没有处理好：" },
         { startFrame: 7620, endFrame: 7930, text: "电平不兼容、驱动不足、过冲振铃、总线争用、ESD 保护缺失，以及串扰噪声。" },
         // Segment 9: 15.04s (7930→8850)
-        { startFrame: 7930, endFrame: 8250, text: "所以，I/O 不是核心逻辑的一根延长线。" },
-        { startFrame: 8250, endFrame: 8550, text: "它负责接收、驱动、切换、保护和电气适配。" },
-        { startFrame: 8550, endFrame: 8850, text: "I/O Cell，才是数字逻辑真正连接物理世界的边界。" },
+        { startFrame: 7930, endFrame: 8220, text: "所以，输入输出接口不是核心逻辑的一根延长线。" },
+        { startFrame: 8220, endFrame: 8500, text: "它负责接收、驱动、切换、保护和电气适配。" },
+        { startFrame: 8500, endFrame: 8850, text: "输入输出单元，才是数字逻辑真正连接物理世界的边界。" },
       ],
     },
   },
