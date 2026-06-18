@@ -10,7 +10,7 @@ const inputIOSpec: CircuitWaveformLinkerAuthoring = {
   title: "输入 I/O — 信号进入芯片的旅程",
   width: 1280,
   height: 720,
-  framesPerCycle: 40,
+  framesPerCycle: 100,
   zones: [
     { id: "ext",  label: "External\nSignal",   x: 40,  y: 300, width: 130, height: 70 },
     { id: "pad",  label: "Pad",                 x: 200, y: 300, width: 110, height: 70 },
@@ -127,6 +127,20 @@ const inputIOSpec: CircuitWaveformLinkerAuthoring = {
       ],
       pulses: [],
     },
+    // Cycles 7-10: Hold state (signal stable at Core)
+    ...Array.from({ length: 4 }, (_, i) => ({
+      cycle: 7 + i,
+      zoneStates: [
+        { zoneId: "ext", state: "IDLE" as const },
+        { zoneId: "pad", state: "IDLE" as const },
+        { zoneId: "esd", state: "IDLE" as const },
+        { zoneId: "buf", state: "IDLE" as const },
+        { zoneId: "sch", state: "IDLE" as const },
+        { zoneId: "sync", state: "IDLE" as const },
+        { zoneId: "core", state: "HOLD" as const },
+      ],
+      pulses: [],
+    })),
   ],
 };
 

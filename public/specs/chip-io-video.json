@@ -70,7 +70,7 @@
     "title": "输入 I/O — 信号进入芯片的旅程",
     "width": 1280,
     "height": 720,
-    "framesPerCycle": 40,
+    "framesPerCycle": 100,
     "zones": [
       { "id": "ext", "label": "External\nSignal", "x": 40, "y": 300, "width": 130, "height": 70 },
       { "id": "pad", "label": "Pad", "x": 200, "y": 300, "width": 110, "height": 70 },
@@ -95,7 +95,10 @@
       { "cycle": 3, "zoneStates": [{ "zoneId": "ext", "state": "IDLE" }, { "zoneId": "pad", "state": "IDLE" }, { "zoneId": "esd", "state": "HOLD" }, { "zoneId": "buf", "state": "ACTIVE" }, { "zoneId": "sch", "state": "IDLE" }, { "zoneId": "sync", "state": "IDLE" }, { "zoneId": "core", "state": "IDLE" }], "pulses": [{ "linkId": "l4" }] },
       { "cycle": 4, "zoneStates": [{ "zoneId": "ext", "state": "IDLE" }, { "zoneId": "pad", "state": "IDLE" }, { "zoneId": "esd", "state": "IDLE" }, { "zoneId": "buf", "state": "HOLD" }, { "zoneId": "sch", "state": "ACTIVE" }, { "zoneId": "sync", "state": "IDLE" }, { "zoneId": "core", "state": "IDLE" }], "pulses": [{ "linkId": "l5" }] },
       { "cycle": 5, "zoneStates": [{ "zoneId": "ext", "state": "IDLE" }, { "zoneId": "pad", "state": "IDLE" }, { "zoneId": "esd", "state": "IDLE" }, { "zoneId": "buf", "state": "IDLE" }, { "zoneId": "sch", "state": "HOLD" }, { "zoneId": "sync", "state": "ACTIVE" }, { "zoneId": "core", "state": "IDLE" }], "pulses": [{ "linkId": "l6" }] },
-      { "cycle": 6, "zoneStates": [{ "zoneId": "ext", "state": "IDLE" }, { "zoneId": "pad", "state": "IDLE" }, { "zoneId": "esd", "state": "IDLE" }, { "zoneId": "buf", "state": "IDLE" }, { "zoneId": "sch", "state": "IDLE" }, { "zoneId": "sync", "state": "HOLD" }, { "zoneId": "core", "state": "ACTIVE" }], "pulses": [] }
+      { "cycle": 6, "zoneStates": [{ "zoneId": "ext", "state": "IDLE" }, { "zoneId": "pad", "state": "IDLE" }, { "zoneId": "esd", "state": "IDLE" }, { "zoneId": "buf", "state": "IDLE" }, { "zoneId": "sch", "state": "IDLE" }, { "zoneId": "sync", "state": "HOLD" }, { "zoneId": "core", "state": "ACTIVE" }], "pulses": [] },
+      { "cycle": 7, "zoneStates": [{ "zoneId": "ext", "state": "IDLE" }, { "zoneId": "pad", "state": "IDLE" }, { "zoneId": "esd", "state": "IDLE" }, { "zoneId": "buf", "state": "IDLE" }, { "zoneId": "sch", "state": "IDLE" }, { "zoneId": "sync", "state": "IDLE" }, { "zoneId": "core", "state": "HOLD" }], "pulses": [] },
+      { "cycle": 8, "zoneStates": [{ "zoneId": "ext", "state": "IDLE" }, { "zoneId": "pad", "state": "IDLE" }, { "zoneId": "esd", "state": "IDLE" }, { "zoneId": "buf", "state": "IDLE" }, { "zoneId": "sch", "state": "IDLE" }, { "zoneId": "sync", "state": "IDLE" }, { "zoneId": "core", "state": "HOLD" }], "pulses": [] },
+      { "cycle": 9, "zoneStates": [{ "zoneId": "ext", "state": "IDLE" }, { "zoneId": "pad", "state": "IDLE" }, { "zoneId": "esd", "state": "IDLE" }, { "zoneId": "buf", "state": "IDLE" }, { "zoneId": "sch", "state": "IDLE" }, { "zoneId": "sync", "state": "IDLE" }, { "zoneId": "core", "state": "HOLD" }], "pulses": [] }
     ]
   },
   "outputDriver": {
@@ -132,13 +135,13 @@
   "summary": {
     "width": 1280,
     "height": 720,
-    "beats": [0, 1.5],
+    "beats": [0, 0.5, 1, 1.5],
     "phrases": [
       {
         "id": "closing",
         "text": "I/O Cell：让芯片内部的 0 和 1\n可靠地走进现实世界",
         "startBeat": 0,
-        "endBeat": 1.5,
+        "endBeat": 3,
         "entrance": "scale-up",
         "exit": "fade-out",
         "fontSize": 42,
@@ -147,7 +150,7 @@
         "x": 0.5,
         "y": 0.42,
         "emphasis": [
-          { "target": "I/O Cell", "type": "glow", "beat": 0.5, "intensity": 1.5 }
+          { "target": "I/O Cell", "type": "glow", "beat": 1, "intensity": 1.5 }
         ]
       }
     ]
