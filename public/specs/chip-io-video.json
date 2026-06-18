@@ -135,13 +135,13 @@
   "summary": {
     "width": 1280,
     "height": 720,
-    "beats": [0, 0.5, 1, 1.5],
+    "beats": [0, 1, 2, 3, 4, 5, 6, 7, 8],
     "phrases": [
       {
         "id": "closing",
         "text": "I/O Cell：让芯片内部的 0 和 1\n可靠地走进现实世界",
         "startBeat": 0,
-        "endBeat": 3,
+        "endBeat": 7,
         "entrance": "scale-up",
         "exit": "fade-out",
         "fontSize": 42,
@@ -150,7 +150,7 @@
         "x": 0.5,
         "y": 0.42,
         "emphasis": [
-          { "target": "I/O Cell", "type": "glow", "beat": 1, "intensity": 1.5 }
+          { "target": "I/O Cell", "type": "glow", "beat": 3, "intensity": 1.5 }
         ]
       }
     ]

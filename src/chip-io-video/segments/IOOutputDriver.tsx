@@ -73,8 +73,8 @@ export const IOOutputDriver: React.FC<{ spec?: OutputDriverSpec }> = ({ spec: cu
         </text>
 
         {/* ── VDD rail → PMOS source ── */}
-        <line x1={mosCX} y1={vddY} x2={mosCX} y2={pmosSourceY} stroke="#ef4444" strokeWidth={2} />
-        <text x={mosCX + 12} y={vddY + 18} fill="#ef4444" fontSize={14} fontWeight={700} fontFamily="Inter, sans-serif">VDD</text>
+        <line x1={sdX} y1={vddY} x2={sdX} y2={pmosSourceY} stroke="#ef4444" strokeWidth={2} />
+        <text x={sdX + 12} y={vddY + 18} fill="#ef4444" fontSize={14} fontWeight={700} fontFamily="Inter, sans-serif">VDD</text>
 
         {/* ── PMOS ── */}
         <MosSwitch cx={mosCX} cy={pmosCY} type="pmos" conducting={pmosOn} />
@@ -91,8 +91,8 @@ export const IOOutputDriver: React.FC<{ spec?: OutputDriverSpec }> = ({ spec: cu
         <MosSwitch cx={mosCX} cy={nmosCY} type="nmos" conducting={nmosOn} />
 
         {/* ── NMOS source → VSS ── */}
-        <line x1={mosCX} y1={nmosSourceY} x2={mosCX} y2={vssY} stroke="#3b82f6" strokeWidth={2} />
-        <text x={mosCX + 12} y={vssY - 10} fill="#3b82f6" fontSize={14} fontWeight={700} fontFamily="Inter, sans-serif">VSS</text>
+        <line x1={sdX} y1={nmosSourceY} x2={sdX} y2={vssY} stroke="#3b82f6" strokeWidth={2} />
+        <text x={sdX + 12} y={vssY - 10} fill="#3b82f6" fontSize={14} fontWeight={700} fontFamily="Inter, sans-serif">VSS</text>
 
         {/* ── Output node → Pad ── */}
         <line x1={sdX} y1={outputY} x2={padCX - 40} y2={outputY} stroke={wireColor} strokeWidth={2.5} />
@@ -128,7 +128,7 @@ export const IOOutputDriver: React.FC<{ spec?: OutputDriverSpec }> = ({ spec: cu
         {/* ── Current arrows ── */}
         {pmosOn && (
           <>
-            <CurrentArrow x1={mosCX} y1={pmosSourceY} x2={sdX} y2={outputY}
+            <CurrentArrow x1={sdX} y1={pmosSourceY} x2={sdX} y2={outputY}
               color="#f472b6" progress={currentProgress} />
             <CurrentArrow x1={sdX} y1={outputY} x2={padCX - 40} y2={outputY}
               color="#f472b6" progress={currentProgress} />
@@ -138,7 +138,7 @@ export const IOOutputDriver: React.FC<{ spec?: OutputDriverSpec }> = ({ spec: cu
           <>
             <CurrentArrow x1={padCX - 40} y1={outputY} x2={sdX} y2={outputY}
               color="#60a5fa" progress={currentProgress} />
-            <CurrentArrow x1={sdX} y1={outputY} x2={mosCX} y2={nmosSourceY}
+            <CurrentArrow x1={sdX} y1={outputY} x2={sdX} y2={nmosSourceY}
               color="#60a5fa" progress={currentProgress} />
           </>
         )}

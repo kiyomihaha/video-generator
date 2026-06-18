@@ -62,12 +62,12 @@ export const IOTristate: React.FC<{ spec?: TristateSpec }> = ({ spec: customSpec
       <svg viewBox={`0 0 ${VW} ${VH}`} width="100%" height="100%">
         {/* Title */}
         <text x={VW / 2} y={40} textAnchor="middle" fill={T.primary} fontSize={20} fontWeight={700} fontFamily="Inter, sans-serif">
-          三态输出与双向 I/O
+          三态输出与总线共享
         </text>
 
         {/* ── VDD → PMOS source ── */}
-        <line x1={mosCX} y1={vddY} x2={mosCX} y2={pmosSourceY} stroke="#ef4444" strokeWidth={2} />
-        <text x={mosCX + 12} y={vddY + 18} fill="#ef4444" fontSize={14} fontWeight={700} fontFamily="Inter, sans-serif">VDD</text>
+        <line x1={sdX} y1={vddY} x2={sdX} y2={pmosSourceY} stroke="#ef4444" strokeWidth={2} />
+        <text x={sdX + 12} y={vddY + 18} fill="#ef4444" fontSize={14} fontWeight={700} fontFamily="Inter, sans-serif">VDD</text>
 
         {/* ── PMOS ── */}
         <MosSwitch cx={mosCX} cy={pmosCY} type="pmos" conducting={pmosOn} />
@@ -85,8 +85,8 @@ export const IOTristate: React.FC<{ spec?: TristateSpec }> = ({ spec: customSpec
         <MosSwitch cx={mosCX} cy={nmosCY} type="nmos" conducting={nmosOn} />
 
         {/* ── NMOS source → VSS ── */}
-        <line x1={mosCX} y1={nmosSourceY} x2={mosCX} y2={vssY} stroke="#3b82f6" strokeWidth={2} />
-        <text x={mosCX + 12} y={vssY - 10} fill="#3b82f6" fontSize={14} fontWeight={700} fontFamily="Inter, sans-serif">VSS</text>
+        <line x1={sdX} y1={nmosSourceY} x2={sdX} y2={vssY} stroke="#3b82f6" strokeWidth={2} />
+        <text x={sdX + 12} y={vssY - 10} fill="#3b82f6" fontSize={14} fontWeight={700} fontFamily="Inter, sans-serif">VSS</text>
 
         {/* ── Output node dot ── */}
         <circle cx={sdX} cy={outputY} r={4} fill={isHighZ ? "#475569" : wireColor} />
@@ -143,10 +143,30 @@ export const IOTristate: React.FC<{ spec?: TristateSpec }> = ({ spec: customSpec
 
         {/* ── Application note ── */}
         <g opacity={phaseIndex === 2 ? phaseProgress : 0.2}>
-          <text x={VW / 2} y={VH - 30} textAnchor="middle" fill={T.muted} fontSize={13} fontFamily="Inter, sans-serif">
+          <text x={VW / 2} y={VH - 50} textAnchor="middle" fill={T.muted} fontSize={13} fontFamily="Inter, sans-serif">
             GPIO、存储器数据总线 — 多设备共享引脚的基础
           </text>
         </g>
+
+        {/* ── Bidirectional note during high-Z ── */}
+        {isHighZ && phaseProgress > 0.3 && (
+          <g opacity={(phaseProgress - 0.3) / 0.7}>
+            {/* Input path: Pad → Input Buffer → Core */}
+            <line x1={padCX + 40} y1={outputY} x2={padCX + 120} y2={outputY - 60}
+              stroke="#34d399" strokeWidth={2} strokeDasharray="6 4" />
+            <rect x={padCX + 120} y={outputY - 80} width={100} height={40} rx={6}
+              fill="#34d399" fillOpacity={0.15} stroke="#34d399" strokeWidth={1.5} />
+            <text x={padCX + 170} y={outputY - 55} textAnchor="middle" fill="#34d399" fontSize={12} fontWeight={600} fontFamily="Inter, sans-serif">
+              Input Buffer
+            </text>
+            <text x={padCX + 170} y={outputY - 40} textAnchor="middle" fill="#34d399" fontSize={11} fontFamily="Inter, sans-serif">
+              Pad → Core
+            </text>
+            <text x={VW / 2} y={VH - 25} textAnchor="middle" fill="#34d399" fontSize={14} fontWeight={600} fontFamily="Inter, sans-serif">
+              OE=0 时可作为输入使用
+            </text>
+          </g>
+        )}
 
         {/* ── High-Z disconnected sparks ── */}
         {isHighZ && phaseProgress > 0 && (
