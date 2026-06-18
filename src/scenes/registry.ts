@@ -395,10 +395,12 @@ export const sceneRegistry: Record<string, SceneEntry<any>> = {
         { startFrame: 594, endFrame: 960, text: "芯片要连接按键、传感器、存储器、显示屏和其他芯片。" },
         { startFrame: 960, endFrame: 1342, text: "真正完成连接的，是一整套 I/O 接口电路。" },
         // Segment 3: 20.48s (1342→2589)
+        // Waveforms start at ~1942 (segment frame 600). Give subtitles 2s readable time.
         { startFrame: 1342, endFrame: 1640, text: "芯片核心可能工作在 0.8 伏，" },
         { startFrame: 1640, endFrame: 1940, text: "但外部接口可能是 1.8 伏或 3.3 伏。" },
-        { startFrame: 1940, endFrame: 2260, text: "核心晶体管驱动能力弱，也承受不了外部静电。", fadeOutEndFrame: 1942 },
-        { startFrame: 2260, endFrame: 2589, text: "所以 I/O 必须完成电平适配、信号整形、功率驱动和保护。", fadeOutEndFrame: 2262 },
+        // These two subtitles end just before waveforms appear
+        { startFrame: 1640, endFrame: 1920, text: "核心晶体管驱动能力弱，也承受不了外部静电。" },
+        { startFrame: 1920, endFrame: 2200, text: "所以 I/O 必须完成电平适配、信号整形、功率驱动和保护。" },
         // Segment 4: 16.64s (2589→3605)
         { startFrame: 2589, endFrame: 2950, text: "信号进入芯片时，首先经过 Pad 和 ESD 保护。" },
         { startFrame: 2950, endFrame: 3300, text: "输入缓冲器再把可能缓慢、带噪声的外部电压，" },

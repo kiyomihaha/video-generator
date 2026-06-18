@@ -35,12 +35,14 @@ const audioVolume = (frame: number, totalFrames: number) => {
   return Math.min(fadeIn, fadeOut);
 };
 
-// Visual opacity curve — fade in first 0.3s, fade out last 0.3s
+// Visual opacity curve — fade in first 0.3s, fade out before WAV ends
 const visualOpacity = (frame: number, totalFrames: number) => {
   const fadeIn = interpolate(frame, [0, FADE_FRAMES], [0, 1], { extrapolateRight: "clamp" });
+  // Visual fade-out matches audio: ends at WAV duration
+  const wavEnd = totalFrames - FADE_FRAMES;
   const fadeOut = interpolate(
     frame,
-    [totalFrames - FADE_FRAMES, totalFrames],
+    [wavEnd - FADE_FRAMES, wavEnd],
     [1, 0],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );

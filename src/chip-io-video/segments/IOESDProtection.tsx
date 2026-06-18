@@ -121,7 +121,7 @@ export const IOESDProtection: React.FC<{ spec?: ESDProtectionSpec }> = ({ spec: 
         {/* ── Phase 1: Positive ESD → D1 conducts to VDD ── */}
         {phaseIndex === 1 && (
           <g>
-            <text x={VW / 2} y={40} textAnchor="middle" fill="#ef4444" fontSize={16} fontWeight={600} fontFamily="Inter, sans-serif">
+            <text x={VW / 2} y={80} textAnchor="middle" fill="#ef4444" fontSize={16} fontWeight={600} fontFamily="Inter, sans-serif">
               正向 ESD：D1 导通，电流泄放到 VDD
             </text>
             <CurrentArrow x1={padCX} y1={padCY - 45} x2={padCX} y2={vddY + 20}
@@ -134,7 +134,7 @@ export const IOESDProtection: React.FC<{ spec?: ESDProtectionSpec }> = ({ spec: 
         {/* ── Phase 2: Negative ESD → D2 conducts to VSS ── */}
         {phaseIndex === 2 && (
           <g>
-            <text x={VW / 2} y={40} textAnchor="middle" fill="#3b82f6" fontSize={16} fontWeight={600} fontFamily="Inter, sans-serif">
+            <text x={VW / 2} y={80} textAnchor="middle" fill="#3b82f6" fontSize={16} fontWeight={600} fontFamily="Inter, sans-serif">
               负向 ESD：D2 导通，电流泄放到 VSS
             </text>
             <CurrentArrow x1={padCX} y1={padCY + 45} x2={padCX} y2={vssY - 20}
@@ -153,7 +153,7 @@ export const IOESDProtection: React.FC<{ spec?: ESDProtectionSpec }> = ({ spec: 
             <text x={coreCX} y={coreCY - 75} textAnchor="middle" fill="#a78bfa" fontSize={13} fontWeight={600} fontFamily="Inter, sans-serif">
               🛡️ Protected
             </text>
-            <text x={VW / 2} y={40} textAnchor="middle" fill="#34d399" fontSize={16} fontWeight={600} fontFamily="Inter, sans-serif">
+            <text x={VW / 2} y={80} textAnchor="middle" fill="#34d399" fontSize={16} fontWeight={600} fontFamily="Inter, sans-serif">
               能量泄放完毕，核心器件安全
             </text>
           </g>
@@ -161,7 +161,7 @@ export const IOESDProtection: React.FC<{ spec?: ESDProtectionSpec }> = ({ spec: 
 
         {/* Phase label (except recovery which has its own) */}
         {phaseIndex < 3 && (
-          <text x={VW / 2} y={40} textAnchor="middle" fill={T.bright} fontSize={16} fontWeight={600} fontFamily="Inter, sans-serif">
+          <text x={VW / 2} y={80} textAnchor="middle" fill={T.bright} fontSize={16} fontWeight={600} fontFamily="Inter, sans-serif">
             {phaseIndex === 0 && "① 静电脉冲击中 Pad"}
             {phaseIndex === 1 && "② 正向冲击：D1 导通 → VDD 泄放"}
             {phaseIndex === 2 && "③ 负向冲击：D2 导通 → VSS 泄放"}
