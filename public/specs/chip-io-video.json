@@ -1,0 +1,155 @@
+{
+  "segmentFrames": {
+    "problemStatement": 420,
+    "ioBoundary": 660,
+    "directConnection": 720,
+    "inputIO": 780,
+    "outputDriver": 840,
+    "tristate": 780,
+    "esdProtection": 540,
+    "problemList": 540,
+    "summary": 480
+  },
+  "problemStatement": {
+    "title": "芯片内部已经产生了 0 和 1，为什么不能直接连到引脚？",
+    "durationInFrames": 420,
+    "fps": 60,
+    "diagram": {
+      "nodes": [
+        { "id": "core", "x": 180, "y": 280, "w": 220, "h": 140, "label": "Core Logic", "color": "#a78bfa" },
+        { "id": "pad", "x": 530, "y": 280, "w": 220, "h": 140, "label": "Pad", "color": "#fbbf24" },
+        { "id": "pcb", "x": 880, "y": 280, "w": 220, "h": 140, "label": "PCB", "color": "#34d399" }
+      ]
+    },
+    "callouts": [
+      { "id": "voltage", "targetX": 400, "targetY": 320, "label": "电平不同", "sublabel": "0.8V vs 3.3V", "preferredQuadrant": "top-left", "color": "#f87171", "startFrame": 60 },
+      { "id": "drive", "targetX": 640, "targetY": 380, "label": "驱动不足", "sublabel": "核心晶体管能力弱", "preferredQuadrant": "bottom-left", "color": "#f87171", "startFrame": 120 },
+      { "id": "noise", "targetX": 990, "targetY": 320, "label": "外部噪声", "sublabel": "PCB 走线拾取干扰", "preferredQuadrant": "top-right", "color": "#f87171", "startFrame": 180 },
+      { "id": "esd", "targetX": 640, "targetY": 220, "label": "静电冲击", "sublabel": "ESD 远超工作电压", "preferredQuadrant": "top-left", "color": "#f87171", "startFrame": 240 }
+    ],
+    "connectors": [
+      { "id": "core-pad", "fromX": 400, "fromY": 350, "toX": 530, "toY": 350, "color": "#a78bfa", "direction": "forward", "animated": true, "startFrame": 30 },
+      { "id": "pad-pcb", "fromX": 750, "fromY": 350, "toX": 880, "toY": 350, "color": "#34d399", "direction": "forward", "animated": true, "startFrame": 30 }
+    ]
+  },
+  "ioBoundary": {
+    "width": 1280,
+    "height": 720,
+    "layerWidth": 700,
+    "layerHeight": 90,
+    "layerGap": 20,
+    "buildOrder": "top-down",
+    "layers": [
+      { "id": "external", "label": "External Devices", "description": "按键 · 传感器 · 存储器 · 显示屏", "color": "#34d399" },
+      { "id": "pad", "label": "Pad", "description": "金属焊盘 — 芯片与 PCB 的物理连接点", "color": "#fbbf24" },
+      { "id": "io-cell", "label": "I/O Cell", "description": "输入缓冲 · 输出驱动 · OE · 上拉下拉 · ESD", "color": "#60a5fa" },
+      { "id": "core", "label": "Core Logic", "description": "数字逻辑核心", "color": "#a78bfa" }
+    ],
+    "beats": [0, 1, 2, 3, 4, 5, 6, 7],
+    "timeline": [
+      { "beat": 0, "type": "enter", "layerId": "external" },
+      { "beat": 1, "type": "enter", "layerId": "pad" },
+      { "beat": 2, "type": "enter", "layerId": "io-cell" },
+      { "beat": 3, "type": "enter", "layerId": "core" },
+      { "beat": 4, "type": "highlight", "layerId": "io-cell" },
+      { "beat": 5, "type": "data-flow", "layerId": "external", "targetLayerId": "pad" },
+      { "beat": 5, "type": "data-flow", "layerId": "pad", "targetLayerId": "io-cell" },
+      { "beat": 5, "type": "data-flow", "layerId": "io-cell", "targetLayerId": "core" },
+      { "beat": 6, "type": "callout", "layerId": "io-cell", "label": "5 个子模块协同工作" },
+      { "beat": 7, "type": "data-flow", "layerId": "core", "targetLayerId": "io-cell" },
+      { "beat": 7, "type": "data-flow", "layerId": "io-cell", "targetLayerId": "pad" },
+      { "beat": 7, "type": "data-flow", "layerId": "pad", "targetLayerId": "external" }
+    ]
+  },
+  "directConnection": {
+    "core": { "label": "Core Logic", "voltage": "0.8V", "traits": ["弱驱动", "敏感"], "color": "#a78bfa" },
+    "external": { "label": "External", "voltage": "3.3V", "traits": ["大负载", "有噪声"], "color": "#34d399" },
+    "durationFrames": 720
+  },
+  "inputIO": {
+    "title": "输入 I/O — 信号进入芯片的旅程",
+    "width": 1280,
+    "height": 720,
+    "framesPerCycle": 40,
+    "zones": [
+      { "id": "ext", "label": "External\nSignal", "x": 40, "y": 300, "width": 130, "height": 70 },
+      { "id": "pad", "label": "Pad", "x": 200, "y": 300, "width": 110, "height": 70 },
+      { "id": "esd", "label": "ESD", "x": 340, "y": 300, "width": 100, "height": 70 },
+      { "id": "buf", "label": "Input\nBuffer", "x": 470, "y": 300, "width": 130, "height": 70 },
+      { "id": "sch", "label": "Schmitt\nTrigger", "x": 630, "y": 300, "width": 140, "height": 70 },
+      { "id": "sync", "label": "Synchronizer", "x": 800, "y": 300, "width": 140, "height": 70 },
+      { "id": "core", "label": "Core", "x": 970, "y": 300, "width": 110, "height": 70 }
+    ],
+    "links": [
+      { "id": "l1", "fromZoneId": "ext", "toZoneId": "pad", "path": "M170,335 L200,335" },
+      { "id": "l2", "fromZoneId": "pad", "toZoneId": "esd", "path": "M310,335 L340,335" },
+      { "id": "l3", "fromZoneId": "esd", "toZoneId": "buf", "path": "M440,335 L470,335" },
+      { "id": "l4", "fromZoneId": "buf", "toZoneId": "sch", "path": "M600,335 L630,335" },
+      { "id": "l5", "fromZoneId": "sch", "toZoneId": "sync", "path": "M770,335 L800,335" },
+      { "id": "l6", "fromZoneId": "sync", "toZoneId": "core", "path": "M940,335 L970,335" }
+    ],
+    "cycles": [
+      { "cycle": 0, "zoneStates": [{ "zoneId": "ext", "state": "ACTIVE" }, { "zoneId": "pad", "state": "IDLE" }, { "zoneId": "esd", "state": "IDLE" }, { "zoneId": "buf", "state": "IDLE" }, { "zoneId": "sch", "state": "IDLE" }, { "zoneId": "sync", "state": "IDLE" }, { "zoneId": "core", "state": "IDLE" }], "pulses": [{ "linkId": "l1" }] },
+      { "cycle": 1, "zoneStates": [{ "zoneId": "ext", "state": "HOLD" }, { "zoneId": "pad", "state": "ACTIVE" }, { "zoneId": "esd", "state": "IDLE" }, { "zoneId": "buf", "state": "IDLE" }, { "zoneId": "sch", "state": "IDLE" }, { "zoneId": "sync", "state": "IDLE" }, { "zoneId": "core", "state": "IDLE" }], "pulses": [{ "linkId": "l2" }] },
+      { "cycle": 2, "zoneStates": [{ "zoneId": "ext", "state": "IDLE" }, { "zoneId": "pad", "state": "HOLD" }, { "zoneId": "esd", "state": "ACTIVE" }, { "zoneId": "buf", "state": "IDLE" }, { "zoneId": "sch", "state": "IDLE" }, { "zoneId": "sync", "state": "IDLE" }, { "zoneId": "core", "state": "IDLE" }], "pulses": [{ "linkId": "l3" }] },
+      { "cycle": 3, "zoneStates": [{ "zoneId": "ext", "state": "IDLE" }, { "zoneId": "pad", "state": "IDLE" }, { "zoneId": "esd", "state": "HOLD" }, { "zoneId": "buf", "state": "ACTIVE" }, { "zoneId": "sch", "state": "IDLE" }, { "zoneId": "sync", "state": "IDLE" }, { "zoneId": "core", "state": "IDLE" }], "pulses": [{ "linkId": "l4" }] },
+      { "cycle": 4, "zoneStates": [{ "zoneId": "ext", "state": "IDLE" }, { "zoneId": "pad", "state": "IDLE" }, { "zoneId": "esd", "state": "IDLE" }, { "zoneId": "buf", "state": "HOLD" }, { "zoneId": "sch", "state": "ACTIVE" }, { "zoneId": "sync", "state": "IDLE" }, { "zoneId": "core", "state": "IDLE" }], "pulses": [{ "linkId": "l5" }] },
+      { "cycle": 5, "zoneStates": [{ "zoneId": "ext", "state": "IDLE" }, { "zoneId": "pad", "state": "IDLE" }, { "zoneId": "esd", "state": "IDLE" }, { "zoneId": "buf", "state": "IDLE" }, { "zoneId": "sch", "state": "HOLD" }, { "zoneId": "sync", "state": "ACTIVE" }, { "zoneId": "core", "state": "IDLE" }], "pulses": [{ "linkId": "l6" }] },
+      { "cycle": 6, "zoneStates": [{ "zoneId": "ext", "state": "IDLE" }, { "zoneId": "pad", "state": "IDLE" }, { "zoneId": "esd", "state": "IDLE" }, { "zoneId": "buf", "state": "IDLE" }, { "zoneId": "sch", "state": "IDLE" }, { "zoneId": "sync", "state": "HOLD" }, { "zoneId": "core", "state": "ACTIVE" }], "pulses": [] }
+    ]
+  },
+  "outputDriver": {
+    "phases": [
+      { "label": "DATA = 1 → PMOS 导通", "dataValue": 1, "activeMos": "pmos", "currentDirection": "source" },
+      { "label": "DATA = 0 → NMOS 导通", "dataValue": 0, "activeMos": "nmos", "currentDirection": "sink" },
+      { "label": "多负载 → 边沿变慢", "dataValue": 1, "activeMos": "pmos", "currentDirection": "source" }
+    ],
+    "phaseFrames": 280,
+    "loadCount": 3
+  },
+  "tristate": {
+    "phases": [
+      { "label": "OE=1, DATA=0 → NMOS 导通, Pad=0", "oe": 1, "data": 0, "padOutput": 0 },
+      { "label": "OE=1, DATA=1 → PMOS 导通, Pad=1", "oe": 1, "data": 1, "padOutput": 1 },
+      { "label": "OE=0 → 高阻态 Z, 引脚断开", "oe": 0, "data": "Z", "padOutput": "Z" }
+    ],
+    "phaseFrames": 260
+  },
+  "esdProtection": {
+    "phaseFrames": 135
+  },
+  "problemList": {
+    "items": [
+      { "icon": "⚡", "label": "电平不兼容", "description": "1.8V × 3.3V — 电平不匹配导致误触发或损坏", "color": "#ef4444" },
+      { "icon": "📉", "label": "驱动不足", "description": "大负载电容导致边沿缓慢，时序违例", "color": "#fbbf24" },
+      { "icon": "〰️", "label": "过冲与振铃", "description": "阻抗不匹配引起信号反射", "color": "#f97316" },
+      { "icon": "💥", "label": "总线争用", "description": "两个输出同时驱动，电流过大", "color": "#ef4444" },
+      { "icon": "🛡️", "label": "ESD 风险", "description": "无保护引脚被静电击穿", "color": "#a78bfa" },
+      { "icon": "📡", "label": "串扰噪声", "description": "长平行走线耦合干扰信号", "color": "#60a5fa" }
+    ],
+    "itemFrames": 90
+  },
+  "summary": {
+    "width": 1280,
+    "height": 720,
+    "beats": [0, 1.5],
+    "phrases": [
+      {
+        "id": "closing",
+        "text": "I/O Cell：让芯片内部的 0 和 1\n可靠地走进现实世界",
+        "startBeat": 0,
+        "endBeat": 1.5,
+        "entrance": "scale-up",
+        "exit": "fade-out",
+        "fontSize": 42,
+        "fontWeight": 700,
+        "anchor": "center",
+        "x": 0.5,
+        "y": 0.42,
+        "emphasis": [
+          { "target": "I/O Cell", "type": "glow", "beat": 0.5, "intensity": 1.5 }
+        ]
+      }
+    ]
+  }
+}

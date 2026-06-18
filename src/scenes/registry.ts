@@ -20,6 +20,7 @@ import cwlSpec from "../../public/specs/cwl-demo.json";
 import laSpec from "../../public/specs/layered-architecture-demo.json";
 import calloutSpec from "../../public/specs/callout-demo.json";
 import legendSpec from "../../public/specs/legend-demo.json";
+import chipIoVideoSpec from "../../public/specs/chip-io-video.json";
 
 import { digitalTimingSpecSchema } from "../motion/primitives/schemas";
 import { pipelineSpecSchema } from "../motion/pipeline/schemas";
@@ -44,6 +45,7 @@ import { CircuitWaveformDemo } from "../circuit-waveform-demo/index";
 import { LayeredArchitectureDemo } from "../layered-architecture-demo/index";
 import { CalloutDemo } from "../callout-demo/index";
 import { LegendDemo } from "../legend-demo/index";
+import { ChipIOVideo } from "../chip-io-video/index";
 
 import type { DigitalTimingSpec } from "../motion/primitives/types";
 import type { PipelineSpec } from "../motion/pipeline/types";
@@ -62,6 +64,7 @@ import { calloutDemoSpecSchema } from "../callout-demo/schemas";
 import type { CalloutDemoSpec } from "../callout-demo/types";
 import { legendSpecSchema } from "../motion/legend/schemas";
 import type { LegendSpec } from "../motion/legend/types";
+import type { ChipIOVideoSpec } from "../chip-io-video/types";
 import type { VideoShellConfig } from "../shell/types";
 
 interface SceneEntry<TSpec> {
@@ -140,6 +143,14 @@ const validDigitalSpecs = {
   latch: digitalTimingSpecSchema.parse(latchSpec),
   glitch: digitalTimingSpecSchema.parse(glitchSpec),
   metastability: digitalTimingSpecSchema.parse(metastabilitySpec),
+};
+
+// ChipIOVideo: duration from sum of segmentFrames
+const calcChipIOVideo: CalculateMetadataFunction<{ spec: ChipIOVideoSpec }> = ({ props }) => {
+  const sf = props.spec.segmentFrames;
+  const total = sf.problemStatement + sf.ioBoundary + sf.directConnection + sf.inputIO
+    + sf.outputDriver + sf.tristate + sf.esdProtection + sf.problemList + sf.summary;
+  return { durationInFrames: total };
 };
 
 export const sceneRegistry: Record<string, SceneEntry<any>> = {
@@ -346,5 +357,65 @@ export const sceneRegistry: Record<string, SceneEntry<any>> = {
     fps: 60,
     width: 1280,
     height: 720,
+  },
+  ChipIOVideo: {
+    component: ChipIOVideo,
+    spec: chipIoVideoSpec as ChipIOVideoSpec,
+    calculateMetadata: calcChipIOVideo,
+    fps: 60,
+    width: 1280,
+    height: 720,
+    shell: {
+      targetAspect: "16:9" as const,
+      titleDurationSec: 2,
+      outroDurationSec: 1.5,
+      title: {
+        phrases: [
+          {
+            id: "title-main",
+            text: "一个 0/1 信号\n走出芯片前要经历什么？",
+            startBeat: 0,
+            endBeat: 2,
+            entrance: "scale-up",
+            exit: "fade-out",
+            fontSize: 48,
+            fontWeight: 700,
+            anchor: "center",
+            x: 0.5,
+            y: 0.42,
+          },
+        ],
+        beats: [0, 1, 2],
+      },
+      outro: {
+        phrases: [
+          {
+            id: "outro",
+            text: "I/O Cell：让 0 和 1 走进现实世界",
+            startBeat: 0,
+            endBeat: 1.5,
+            entrance: "fade-in",
+            exit: "fade-out",
+            fontSize: 42,
+            fontWeight: 600,
+            anchor: "center",
+            x: 0.5,
+            y: 0.42,
+          },
+        ],
+        beats: [0, 0.5, 1, 1.5],
+      },
+      subtitles: [
+        { startFrame: 0, endFrame: 420, text: "芯片内部已经产生了 0 和 1，为什么不能直接连到引脚？" },
+        { startFrame: 420, endFrame: 1080, text: "真正完成连接的，是一整套 I/O 接口电路" },
+        { startFrame: 1080, endFrame: 1800, text: "核心晶体管驱动能力弱，也承受不了外部静电" },
+        { startFrame: 1800, endFrame: 2580, text: "输入缓冲器把外部电压转换成内部明确的 0 或 1" },
+        { startFrame: 2580, endFrame: 3420, text: "输出驱动器利用更大晶体管提供电流，推动 PCB 走线" },
+        { startFrame: 3420, endFrame: 4200, text: "OE 关闭时，引脚进入高阻态 Z，暂时退出总线" },
+        { startFrame: 4200, endFrame: 4740, text: "ESD 钳位电路把静电能量导向电源或地" },
+        { startFrame: 4740, endFrame: 5280, text: "很多板级问题，是 I/O 边界没有处理好" },
+        { startFrame: 5280, endFrame: 5760, text: "I/O Cell，才是数字逻辑连接物理世界的边界" },
+      ],
+    },
   },
 };
