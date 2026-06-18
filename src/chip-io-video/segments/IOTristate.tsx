@@ -141,14 +141,12 @@ export const IOTristate: React.FC<{ spec?: TristateSpec }> = ({ spec: customSpec
           {phase.label}
         </text>
 
-        {/* ── Application note ── */}
-        <g opacity={phaseIndex === 2 ? phaseProgress : 0.2}>
-          <text x={VW / 2} y={VH - 50} textAnchor="middle" fill={T.muted} fontSize={13} fontFamily="Inter, sans-serif">
-            GPIO、存储器数据总线 — 多设备共享引脚的基础
-          </text>
-        </g>
+        {/* ── Phase label (top of bottom area) ── */}
+        <text x={VW / 2} y={VH - 50} textAnchor="middle" fill={T.bright} fontSize={16} fontWeight={600} fontFamily="Inter, sans-serif">
+          {phase.label}
+        </text>
 
-        {/* ── Bidirectional note during high-Z ── */}
+        {/* ── Bidirectional note during high-Z (above phase label) ── */}
         {isHighZ && phaseProgress > 0.3 && (
           <g opacity={(phaseProgress - 0.3) / 0.7}>
             {/* Input path: Pad → Input Buffer → Core */}
@@ -158,12 +156,6 @@ export const IOTristate: React.FC<{ spec?: TristateSpec }> = ({ spec: customSpec
               fill="#34d399" fillOpacity={0.15} stroke="#34d399" strokeWidth={1.5} />
             <text x={padCX + 170} y={outputY - 55} textAnchor="middle" fill="#34d399" fontSize={12} fontWeight={600} fontFamily="Inter, sans-serif">
               Input Buffer
-            </text>
-            <text x={padCX + 170} y={outputY - 40} textAnchor="middle" fill="#34d399" fontSize={11} fontFamily="Inter, sans-serif">
-              Pad → Core
-            </text>
-            <text x={VW / 2} y={VH - 25} textAnchor="middle" fill="#34d399" fontSize={14} fontWeight={600} fontFamily="Inter, sans-serif">
-              OE=0 时可作为输入使用
             </text>
           </g>
         )}

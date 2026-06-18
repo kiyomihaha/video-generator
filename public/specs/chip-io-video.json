@@ -141,7 +141,7 @@
         "id": "closing",
         "text": "I/O Cell：让芯片内部的 0 和 1\n可靠地走进现实世界",
         "startBeat": 0,
-        "endBeat": 7,
+        "endBeat": 8,
         "entrance": "scale-up",
         "exit": "fade-out",
         "fontSize": 42,
