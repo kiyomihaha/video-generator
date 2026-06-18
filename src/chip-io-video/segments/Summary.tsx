@@ -93,16 +93,36 @@ export const Summary: React.FC<{ spec?: TextEmphasisSpec }> = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: S.bg, opacity: overallOpacity }}>
       <svg viewBox={`0 0 ${VW} ${VH}`} width="100%" height="100%">
-        {/* Links between nodes */}
+        {/* Links between nodes — right edge to left edge, with bidirectional arrows */}
         <g opacity={getLinkOpacity()}>
           {NODES.slice(0, -1).map((node, i) => {
             const next = NODES[i + 1];
+            const startX = node.x + NODE_W;  // right edge of current node
+            const endX = next.x;              // left edge of next node
+            const y = NODE_Y + NODE_H / 2;   // shared horizontal axis
+            const midX = (startX + endX) / 2;
+            const arrowLen = 8;
+            const arrowGap = 6;  // gap between arrow and node border
+
             return (
-              <line key={node.id}
-                x1={node.x + NODE_W / 2} y1={NODE_Y + NODE_H / 2}
-                x2={next.x - NODE_W / 2} y2={NODE_Y + NODE_H / 2}
-                stroke={T.muted} strokeWidth={2}
-              />
+              <g key={node.id}>
+                {/* Main connection line */}
+                <line
+                  x1={startX + arrowGap} y1={y}
+                  x2={endX - arrowGap} y2={y}
+                  stroke={T.muted} strokeWidth={2}
+                />
+                {/* Right-pointing arrow (→) at right end */}
+                <polygon
+                  points={`${endX - arrowGap},${y} ${endX - arrowGap - arrowLen},${y - 5} ${endX - arrowGap - arrowLen},${y + 5}`}
+                  fill={T.muted}
+                />
+                {/* Left-pointing arrow (←) at left end */}
+                <polygon
+                  points={`${startX + arrowGap},${y} ${startX + arrowGap + arrowLen},${y - 5} ${startX + arrowGap + arrowLen},${y + 5}`}
+                  fill={T.muted}
+                />
+              </g>
             );
           })}
         </g>
@@ -149,21 +169,6 @@ export const Summary: React.FC<{ spec?: TextEmphasisSpec }> = () => {
             </g>
           );
         })}
-
-        {/* Bidirectional arrows */}
-        <g opacity={getLinkOpacity()}>
-          {[0, 1, 2].map(i => {
-            const n1 = NODES[i];
-            const n2 = NODES[i + 1];
-            const midX = (n1.x + NODE_W / 2 + n2.x - NODE_W / 2) / 2;
-            return (
-              <g key={i}>
-                <text x={midX} y={NODE_Y + NODE_H / 2 - 12} textAnchor="middle"
-                  fill={T.muted} fontSize={11} fontFamily="Inter, sans-serif">↔</text>
-              </g>
-            );
-          })}
-        </g>
 
         {/* I/O Cell capabilities */}
         <g>
