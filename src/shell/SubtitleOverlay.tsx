@@ -2,7 +2,7 @@
 // HTML (not SVG) for CJK wrapping, text-shadow, performance
 // Gemini's edge case: locked height prevents layout jitter between 1/2-line subs
 import React from "react";
-import { AbsoluteFill, useCurrentFrame } from "remotion";
+import { AbsoluteFill, useCurrentFrame, interpolate } from "remotion";
 import type { SubtitleEntry } from "./types";
 import { THEME } from "../theme";
 
@@ -39,6 +39,8 @@ const TEXT_STYLE: React.CSSProperties = {
   MozOsxFontSmoothing: "grayscale",
 };
 
+const FADE_FRAMES = 15; // 0.25s fade duration
+
 export const SubtitleOverlay: React.FC<Props> = ({ subtitles, fps, bottomOffset = 24 }) => {
   const frame = useCurrentFrame();
 
@@ -48,12 +50,25 @@ export const SubtitleOverlay: React.FC<Props> = ({ subtitles, fps, bottomOffset 
 
   if (!active) return null;
 
+  // Calculate opacity for smooth fade-out
+  let opacity = 1;
+  if (active.fadeOutEndFrame !== undefined && frame >= active.fadeOutEndFrame) {
+    // Fade out from fadeOutEndFrame to endFrame
+    opacity = interpolate(
+      frame,
+      [active.fadeOutEndFrame, active.endFrame],
+      [1, 0],
+      { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+    );
+  }
+
   return (
     <AbsoluteFill style={{ pointerEvents: "none" }}>
       <div
         style={{
           ...CONTAINER_STYLE,
           bottom: bottomOffset,
+          opacity,
         }}
       >
         <span

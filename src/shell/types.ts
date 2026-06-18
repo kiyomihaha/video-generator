@@ -14,6 +14,7 @@ export interface SubtitleEntry {
   text: string;
   y?: number;
   fontSize?: number;
+  fadeOutEndFrame?: number;  // Optional: frame at which subtitle fully fades out (for smooth fade before endFrame)
 }
 
 export interface VideoShellConfig {
