@@ -1,27 +1,62 @@
-// Segment 6: IOTristate — Tri-state output with OE control
-// Shows PMOS/NMOS with output enable, high-Z state
-// Circuit: VDD → PMOS → output node → Pad
-//          VSS → NMOS → output node
-// OE controls both gates (with inverter on PMOS)
-// Status info bar at top, circuit in middle, 140px bottom reserved for subtitles
+// Segment 6: IOTristate — Tri-state output (complete layout restructure)
+// Three-zone layout: Title/Status (0-105), Circuit (105-530), Subtitles (530-720)
+// All phases use identical geometry — only colors/states change
 
 import React from "react";
 import { AbsoluteFill, useCurrentFrame } from "remotion";
 import { THEME } from "../../theme";
-import { MosSwitch } from "../base/MosSwitch";
-import { PadBlock } from "../base/PadBlock";
 import { clamp01, easeOutCubic } from "../../motion/utils";
 import type { TristateSpec } from "../types";
 
 const T = THEME.text;
+const S = THEME.canvas;
 const VW = 1280;
 const VH = 720;
 
+// ── Layout zones ──
+const ZONE = {
+  titleY: 30,
+  statusBarY: 48,
+  statusBarH: 46,
+  circuitTop: 105,
+  circuitBottom: 525,
+  subtitleTop: 530,
+};
+
+// ── Circuit geometry (centered) ──
+const CIRCUIT = {
+  // OE/DATA input indicators (left side)
+  inputX: 180,
+  inputW: 120,
+  inputGap: 80,
+
+  // MOSFET main circuit (center)
+  mosX: 540,
+  mosGap: 150,  // PMOS to NMOS vertical gap
+  mosW: 50,
+  mosH: 60,
+
+  // Pad output (right of center)
+  padX: 780,
+  padW: 90,
+  padH: 54,
+
+  // Input Buffer (far right, always present)
+  bufX: 960,
+  bufW: 160,
+  bufH: 64,
+
+  // VDD/VSS rails
+  vddY: 120,
+  vssY: 500,
+};
+
+// ── Default spec ──
 const defaultSpec: TristateSpec = {
   phases: [
-    { label: "OE=1, DATA=0 → NMOS 导通, Pad=0", oe: 1, data: 0, padOutput: 0 },
-    { label: "OE=1, DATA=1 → PMOS 导通, Pad=1", oe: 1, data: 1, padOutput: 1 },
-    { label: "OE=0 → 高阻态 Z, 引脚断开", oe: 0, data: "Z", padOutput: "Z" },
+    { label: "NMOS 导通，Pad 拉低", oe: 1, data: 0, padOutput: 0 },
+    { label: "PMOS 导通，Pad 拉高", oe: 1, data: 1, padOutput: 1 },
+    { label: "高阻态 Z，引脚断开", oe: 0, data: "Z", padOutput: "Z" },
   ],
   phaseFrames: 380,
 };
@@ -31,202 +66,245 @@ export const IOTristate: React.FC<{ spec?: TristateSpec }> = ({ spec: customSpec
   const frame = useCurrentFrame();
   const pf = spec.phaseFrames;
 
-  // Intro hold: 1 second static display before animation begins
-  const INTRO_HOLD_FRAMES = 60;
-  const animationFrame = Math.max(0, frame - INTRO_HOLD_FRAMES);
+  // Intro hold: 1 second
+  const INTRO_HOLD = 60;
+  const animFrame = Math.max(0, frame - INTRO_HOLD);
 
-  // Phase calculation uses animationFrame (starts after hold)
-  const phaseIndex = Math.min(Math.floor(animationFrame / pf), spec.phases.length - 1);
-  const phase = spec.phases[phaseIndex];
-  const phaseFrame = animationFrame - phaseIndex * pf;
+  // Phase calculation
+  const phaseIdx = Math.min(Math.floor(animFrame / pf), spec.phases.length - 1);
+  const phase = spec.phases[phaseIdx];
+  const phaseFrame = animFrame - phaseIdx * pf;
   const phaseProgress = easeOutCubic(clamp01(phaseFrame / 50));
 
-  // During hold period, force initial state (OE=1, DATA=0, NMOS conducting)
-  const isHolding = frame < INTRO_HOLD_FRAMES;
-  const effectivePhase = isHolding ? spec.phases[0] : phase;
-  const effectivePhaseProgress = isHolding ? 0 : phaseProgress;
+  const isHolding = frame < INTRO_HOLD;
+  const effective = isHolding ? spec.phases[0] : phase;
+  const effectiveProgress = isHolding ? 0 : phaseProgress;
 
-  const isHighZ = effectivePhase.padOutput === "Z";
-  const pmosOn = effectivePhase.oe === 1 && effectivePhase.data === 1;
-  const nmosOn = effectivePhase.oe === 1 && effectivePhase.data === 0;
+  const isHighZ = effective.padOutput === "Z";
+  const pmosOn = effective.oe === 1 && effective.data === 1;
+  const nmosOn = effective.oe === 1 && effective.data === 0;
 
-  // ── Circuit coordinates ──
-  const mosCX = 350;
-  const pmosCY = 250;
-  const nmosCY = 400;
-  const pmosSourceY = pmosCY - 12.5;
-  const pmosDrainY = pmosCY + 12.5;
-  const nmosDrainY = nmosCY - 12.5;
-  const nmosSourceY = nmosCY + 12.5;
-  const outputY = (pmosDrainY + nmosDrainY) / 2;
-  const sdX = mosCX + 20;
+  // ── Derived positions ──
+  const pmosCY = ZONE.circuitTop + 120;
+  const nmosCY = pmosCY + CIRCUIT.mosGap;
+  const outputY = (pmosCY + nmosCY) / 2;
+  const sdX = CIRCUIT.mosX + CIRCUIT.mosW / 2;
 
-  const padCX = 680;
-  const vddY = 100;
-  const vssY = 530;  // moved up to avoid bottom 140px
-
-  const oeColor = effectivePhase.oe ? THEME.status.hit : THEME.text.muted;
+  // Colors
+  const oeColor = effective.oe ? THEME.status.hit : T.muted;
   const wireColor = isHighZ ? "#475569" : (pmosOn ? "#f472b6" : "#60a5fa");
+  const activeColor = isHighZ ? "#94a3b8" : (pmosOn ? "#f472b6" : "#60a5fa");
 
-  // Status text
-  const conductingText = isHighZ ? "无（高阻）" : (pmosOn ? "PMOS" : "NMOS");
-  const padValueText = isHighZ ? "Z（高阻）" : String(effectivePhase.padOutput);
+  // Input Buffer opacity (always present, highlighted during high-Z)
+  const bufOpacity = isHighZ
+    ? easeOutCubic(clamp01(effectiveProgress / 0.3))
+    : 0.25;
 
   return (
-    <AbsoluteFill style={{ backgroundColor: THEME.canvas.bg }}>
+    <AbsoluteFill style={{ backgroundColor: S.bg }}>
       <svg viewBox={`0 0 ${VW} ${VH}`} width="100%" height="100%">
+
+        {/* ═══════════════════════════════════════════════════ */}
+        {/* ZONE 1: Title + Status Bar (0–105)                  */}
+        {/* ═══════════════════════════════════════════════════ */}
+
         {/* Title */}
-        <text x={VW / 2} y={36} textAnchor="middle" fill={T.primary} fontSize={20} fontWeight={700} fontFamily="Inter, sans-serif">
+        <text x={VW / 2} y={ZONE.titleY} textAnchor="middle"
+          fill={T.primary} fontSize={20} fontWeight={700} fontFamily="Inter, sans-serif">
           三态输出与总线共享
         </text>
 
-        {/* ── Status info bar (y=55-95) ── */}
-        <g>
-          {/* Background bar */}
-          <rect x={140} y={55} width={1000} height={40} rx={6}
-            fill={THEME.canvas.panel} stroke={THEME.canvas.grid} strokeWidth={1} />
+        {/* Status bar background */}
+        <rect x={80} y={ZONE.statusBarY} width={VW - 160} height={ZONE.statusBarH}
+          rx={6} fill={S.panel} stroke={S.grid} strokeWidth={1} />
 
-          {/* OE */}
-          <text x={200} y={80} textAnchor="middle" fill={T.muted} fontSize={14} fontFamily="Inter, sans-serif">OE</text>
-          <text x={240} y={80} textAnchor="middle"
-            fill={effectivePhase.oe ? THEME.status.hit : THEME.status.miss}
-            fontSize={18} fontWeight={700} fontFamily="Inter, sans-serif">
-            {effectivePhase.oe ? "1" : "0"}
-          </text>
+        {/* Four equal-width fields: OE | DATA | 导通路径 | Pad */}
+        {(() => {
+          const barX = 80;
+          const barW = VW - 160;
+          const fieldW = barW / 4;
+          const fieldY = ZONE.statusBarY + ZONE.statusBarH / 2;
 
-          {/* Separator */}
-          <line x1={280} y1={62} x2={280} y2={88} stroke={THEME.canvas.grid} strokeWidth={1} />
+          const fields = [
+            { label: "OE", value: effective.oe ? "1" : "0", color: effective.oe ? THEME.status.hit : THEME.status.miss },
+            { label: "DATA", value: effective.data === "Z" ? "X" : String(effective.data), color: effective.data === "Z" ? T.muted : (effective.data ? THEME.status.hit : THEME.status.miss) },
+            { label: "导通路径", value: isHighZ ? "无（高阻）" : (pmosOn ? "PMOS" : "NMOS"), color: isHighZ ? T.muted : activeColor },
+            { label: "Pad", value: isHighZ ? "Z（高阻）" : String(effective.padOutput), color: isHighZ ? "#94a3b8" : (effective.padOutput === 1 ? THEME.status.hit : THEME.status.miss) },
+          ];
 
-          {/* DATA */}
-          <text x={340} y={80} textAnchor="middle" fill={T.muted} fontSize={14} fontFamily="Inter, sans-serif">DATA</text>
-          <text x={385} y={80} textAnchor="middle"
-            fill={effectivePhase.data === "Z" ? THEME.text.muted : (effectivePhase.data ? THEME.status.hit : THEME.status.miss)}
-            fontSize={18} fontWeight={700} fontFamily="Inter, sans-serif">
-            {effectivePhase.data === "Z" ? "X" : String(effectivePhase.data)}
-          </text>
+          return fields.map((f, i) => {
+            const fx = barX + i * fieldW;
+            return (
+              <g key={f.label}>
+                {/* Separator (except first) */}
+                {i > 0 && (
+                  <line x1={fx} y1={ZONE.statusBarY + 6} x2={fx} y2={ZONE.statusBarY + ZONE.statusBarH - 6}
+                    stroke={S.grid} strokeWidth={1} />
+                )}
+                {/* Label */}
+                <text x={fx + fieldW / 2} y={fieldY - 6} textAnchor="middle"
+                  fill={T.muted} fontSize={12} fontFamily="Inter, sans-serif">
+                  {f.label}
+                </text>
+                {/* Value */}
+                <text x={fx + fieldW / 2} y={fieldY + 14} textAnchor="middle"
+                  fill={f.color} fontSize={18} fontWeight={700} fontFamily="Inter, sans-serif">
+                  {f.value}
+                </text>
+              </g>
+            );
+          });
+        })()}
 
-          {/* Separator */}
-          <line x1={425} y1={62} x2={425} y2={88} stroke={THEME.canvas.grid} strokeWidth={1} />
+        {/* ═══════════════════════════════════════════════════ */}
+        {/* ZONE 2: Circuit (105–525)                           */}
+        {/* ═══════════════════════════════════════════════════ */}
 
-          {/* Conducting device */}
-          <text x={520} y={80} textAnchor="middle" fill={T.muted} fontSize={14} fontFamily="Inter, sans-serif">导通</text>
-          <text x={580} y={80} textAnchor="middle"
-            fill={isHighZ ? THEME.text.muted : (pmosOn ? "#f472b6" : "#60a5fa")}
-            fontSize={16} fontWeight={600} fontFamily="Inter, sans-serif">
-            {conductingText}
-          </text>
-
-          {/* Separator */}
-          <line x1={650} y1={62} x2={650} y2={88} stroke={THEME.canvas.grid} strokeWidth={1} />
-
-          {/* Pad output */}
-          <text x={720} y={80} textAnchor="middle" fill={T.muted} fontSize={14} fontFamily="Inter, sans-serif">Pad</text>
-          <text x={770} y={80} textAnchor="middle"
-            fill={isHighZ ? "#94a3b8" : (effectivePhase.padOutput === 1 ? THEME.status.hit : THEME.status.miss)}
-            fontSize={18} fontWeight={700} fontFamily="Inter, sans-serif">
-            {padValueText}
-          </text>
-
-          {/* Phase label */}
-          <text x={920} y={80} textAnchor="middle" fill={T.bright} fontSize={16} fontWeight={600} fontFamily="Inter, sans-serif">
-            {effectivePhase.label}
-          </text>
-        </g>
-
-        {/* ── VDD → PMOS source ── */}
-        <line x1={sdX} y1={vddY} x2={sdX} y2={pmosSourceY} stroke="#ef4444" strokeWidth={2} />
-        <text x={sdX + 12} y={vddY + 18} fill="#ef4444" fontSize={14} fontWeight={700} fontFamily="Inter, sans-serif">VDD</text>
+        {/* ── VDD rail ── */}
+        <line x1={sdX} y1={CIRCUIT.vddY} x2={sdX} y2={pmosCY - CIRCUIT.mosH / 2}
+          stroke="#ef4444" strokeWidth={2} />
+        <text x={sdX + 12} y={CIRCUIT.vddY + 16} fill="#ef4444"
+          fontSize={14} fontWeight={700} fontFamily="Inter, sans-serif">VDD</text>
 
         {/* ── PMOS ── */}
-        <MosSwitch cx={mosCX} cy={pmosCY} type="pmos" conducting={pmosOn} />
-        <circle cx={mosCX - 33} cy={pmosCY} r={5} fill="none" stroke={wireColor} strokeWidth={1.5} />
+        <rect x={CIRCUIT.mosX} y={pmosCY - CIRCUIT.mosH / 2}
+          width={CIRCUIT.mosW} height={CIRCUIT.mosH} rx={6}
+          fill={pmosOn ? "#f472b6" : "#475569"} fillOpacity={pmosOn ? 0.3 : 0.1}
+          stroke={pmosOn ? "#f472b6" : "#475569"} strokeWidth={pmosOn ? 2.5 : 1.5}
+          strokeDasharray={pmosOn ? "none" : "6 4"} />
+        <text x={CIRCUIT.mosX + CIRCUIT.mosW / 2} y={pmosCY + 5} textAnchor="middle"
+          fill={pmosOn ? "#f472b6" : "#475569"} fontSize={16} fontWeight={700} fontFamily="Inter, sans-serif">
+          PMOS
+        </text>
+        {/* Inverter bubble */}
+        <circle cx={CIRCUIT.mosX - 10} cy={pmosCY} r={5}
+          fill="none" stroke={wireColor} strokeWidth={1.5} />
 
         {/* ── PMOS drain → output node ── */}
-        <line x1={sdX} y1={pmosDrainY} x2={sdX} y2={outputY}
+        <line x1={sdX} y1={pmosCY + CIRCUIT.mosH / 2} x2={sdX} y2={outputY}
           stroke={wireColor} strokeWidth={2} strokeDasharray={isHighZ ? "6 4" : "none"} />
 
         {/* ── NMOS drain → output node ── */}
-        <line x1={sdX} y1={nmosDrainY} x2={sdX} y2={outputY}
+        <line x1={sdX} y1={nmosCY - CIRCUIT.mosH / 2} x2={sdX} y2={outputY}
           stroke={wireColor} strokeWidth={2} strokeDasharray={isHighZ ? "6 4" : "none"} />
 
         {/* ── NMOS ── */}
-        <MosSwitch cx={mosCX} cy={nmosCY} type="nmos" conducting={nmosOn} />
+        <rect x={CIRCUIT.mosX} y={nmosCY - CIRCUIT.mosH / 2}
+          width={CIRCUIT.mosW} height={CIRCUIT.mosH} rx={6}
+          fill={nmosOn ? "#60a5fa" : "#475569"} fillOpacity={nmosOn ? 0.3 : 0.1}
+          stroke={nmosOn ? "#60a5fa" : "#475569"} strokeWidth={nmosOn ? 2.5 : 1.5}
+          strokeDasharray={nmosOn ? "none" : "6 4"} />
+        <text x={CIRCUIT.mosX + CIRCUIT.mosW / 2} y={nmosCY + 5} textAnchor="middle"
+          fill={nmosOn ? "#60a5fa" : "#475569"} fontSize={16} fontWeight={700} fontFamily="Inter, sans-serif">
+          NMOS
+        </text>
 
         {/* ── NMOS source → VSS ── */}
-        <line x1={sdX} y1={nmosSourceY} x2={sdX} y2={vssY} stroke="#3b82f6" strokeWidth={2} />
-        <text x={sdX + 12} y={vssY - 10} fill="#3b82f6" fontSize={14} fontWeight={700} fontFamily="Inter, sans-serif">VSS</text>
+        <line x1={sdX} y1={nmosCY + CIRCUIT.mosH / 2} x2={sdX} y2={CIRCUIT.vssY}
+          stroke="#3b82f6" strokeWidth={2} />
+        <text x={sdX + 12} y={CIRCUIT.vssY - 8} fill="#3b82f6"
+          fontSize={14} fontWeight={700} fontFamily="Inter, sans-serif">VSS</text>
 
         {/* ── Output node dot ── */}
-        <circle cx={sdX} cy={outputY} r={4} fill={isHighZ ? "#475569" : wireColor} />
+        <circle cx={sdX} cy={outputY} r={5} fill={wireColor} />
 
         {/* ── Output node → Pad ── */}
-        <line x1={sdX} y1={outputY} x2={padCX - 40} y2={outputY}
+        <line x1={sdX} y1={outputY} x2={CIRCUIT.padX - CIRCUIT.padW / 2} y2={outputY}
           stroke={wireColor} strokeWidth={2.5} strokeDasharray={isHighZ ? "6 4" : "none"} />
 
-        {/* Pad */}
-        <PadBlock cx={padCX} cy={outputY} width={80} height={40}
-          color={isHighZ ? "#475569" : "#fbbf24"}
-          label={isHighZ ? "Z" : String(effectivePhase.padOutput)} />
+        {/* ── Pad ── */}
+        <rect x={CIRCUIT.padX - CIRCUIT.padW / 2} y={outputY - CIRCUIT.padH / 2}
+          width={CIRCUIT.padW} height={CIRCUIT.padH} rx={6}
+          fill={isHighZ ? "#475569" : "#fbbf24"} fillOpacity={isHighZ ? 0.15 : 0.25}
+          stroke={isHighZ ? "#475569" : "#fbbf24"} strokeWidth={2} />
+        <text x={CIRCUIT.padX} y={outputY - 8} textAnchor="middle"
+          fill={isHighZ ? "#475569" : "#fbbf24"} fontSize={12} fontFamily="Inter, sans-serif">
+          Pad
+        </text>
+        <text x={CIRCUIT.padX} y={outputY + 14} textAnchor="middle"
+          fill={isHighZ ? "#94a3b8" : (effective.padOutput === 1 ? THEME.status.hit : THEME.status.miss)}
+          fontSize={20} fontWeight={700} fontFamily="Inter, sans-serif">
+          {isHighZ ? "Z" : String(effective.padOutput)}
+        </text>
 
-        {/* ── OE signal indicator (left side) ── */}
-        <g transform="translate(80, 200)">
-          <text x={0} y={0} fill={T.primary} fontSize={14} fontWeight={600} fontFamily="Inter, sans-serif">OE</text>
-          <rect x={0} y={10} width={80} height={30} rx={4}
-            fill={effectivePhase.oe ? THEME.status.hit : "#475569"} fillOpacity={0.3}
-            stroke={effectivePhase.oe ? THEME.status.hit : "#475569"} strokeWidth={1.5} />
-          <text x={40} y={30} textAnchor="middle" fill={effectivePhase.oe ? THEME.status.hit : THEME.text.muted}
-            fontSize={16} fontWeight={700} fontFamily="Inter, sans-serif">
-            {effectivePhase.oe ? "1" : "0"}
+        {/* ── Input Buffer (always present, dim when not high-Z) ── */}
+        <g opacity={bufOpacity}>
+          <rect x={CIRCUIT.bufX} y={outputY - CIRCUIT.bufH / 2}
+            width={CIRCUIT.bufW} height={CIRCUIT.bufH} rx={6}
+            fill={THEME.status.hit} fillOpacity={0.12}
+            stroke={THEME.status.hit} strokeWidth={isHighZ ? 2 : 1.5} />
+          <text x={CIRCUIT.bufX + CIRCUIT.bufW / 2} y={outputY - 8} textAnchor="middle"
+            fill={THEME.status.hit} fontSize={15} fontWeight={600} fontFamily="Inter, sans-serif">
+            Input Buffer
+          </text>
+          <text x={CIRCUIT.bufX + CIRCUIT.bufW / 2} y={outputY + 12} textAnchor="middle"
+            fill={THEME.status.hit} fontSize={12} fontFamily="Inter, sans-serif">
+            OE=0 时作输入
           </text>
         </g>
 
-        {/* ── DATA signal indicator (left side) ── */}
-        <g transform="translate(80, 280)">
-          <text x={0} y={0} fill={T.primary} fontSize={14} fontWeight={600} fontFamily="Inter, sans-serif">DATA</text>
-          <rect x={0} y={10} width={80} height={30} rx={4}
-            fill={effectivePhase.data === "Z" ? "#475569" : (effectivePhase.data ? THEME.status.hit : THEME.status.miss)} fillOpacity={0.3}
-            stroke={effectivePhase.data === "Z" ? "#475569" : (effectivePhase.data ? THEME.status.hit : THEME.status.miss)} strokeWidth={1.5} />
-          <text x={40} y={30} textAnchor="middle"
-            fill={effectivePhase.data === "Z" ? THEME.text.muted : (effectivePhase.data ? THEME.status.hit : THEME.status.miss)}
-            fontSize={16} fontWeight={700} fontFamily="Inter, sans-serif">
-            {effectivePhase.data === "Z" ? "X" : String(effectivePhase.data)}
+        {/* Pad → Input Buffer connection (only during high-Z) */}
+        {isHighZ && effectiveProgress > 0.2 && (
+          <line
+            x1={CIRCUIT.padX + CIRCUIT.padW / 2} y1={outputY}
+            x2={CIRCUIT.bufX} y2={outputY}
+            stroke={THEME.status.hit} strokeWidth={2} strokeDasharray="6 4"
+            opacity={easeOutCubic(clamp01((effectiveProgress - 0.2) / 0.3))}
+          />
+        )}
+
+        {/* ── OE input indicator (left) ── */}
+        <g transform={`translate(${CIRCUIT.inputX}, ${pmosCY - 30})`}>
+          <text x={0} y={0} fill={T.primary} fontSize={14} fontWeight={600} fontFamily="Inter, sans-serif">
+            OE
+          </text>
+          <rect x={0} y={10} width={CIRCUIT.inputW} height={36} rx={4}
+            fill={effective.oe ? THEME.status.hit : "#475569"} fillOpacity={0.2}
+            stroke={effective.oe ? THEME.status.hit : "#475569"} strokeWidth={1.5} />
+          <text x={CIRCUIT.inputW / 2} y={33} textAnchor="middle"
+            fill={effective.oe ? THEME.status.hit : T.muted}
+            fontSize={18} fontWeight={700} fontFamily="Inter, sans-serif">
+            {effective.oe ? "1" : "0"}
+          </text>
+        </g>
+
+        {/* ── DATA input indicator (left) ── */}
+        <g transform={`translate(${CIRCUIT.inputX}, ${nmosCY - 30})`}>
+          <text x={0} y={0} fill={T.primary} fontSize={14} fontWeight={600} fontFamily="Inter, sans-serif">
+            DATA
+          </text>
+          <rect x={0} y={10} width={CIRCUIT.inputW} height={36} rx={4}
+            fill={effective.data === "Z" ? "#475569" : (effective.data ? THEME.status.hit : THEME.status.miss)} fillOpacity={0.2}
+            stroke={effective.data === "Z" ? "#475569" : (effective.data ? THEME.status.hit : THEME.status.miss)} strokeWidth={1.5} />
+          <text x={CIRCUIT.inputW / 2} y={33} textAnchor="middle"
+            fill={effective.data === "Z" ? T.muted : (effective.data ? THEME.status.hit : THEME.status.miss)}
+            fontSize={18} fontWeight={700} fontFamily="Inter, sans-serif">
+            {effective.data === "Z" ? "X" : String(effective.data)}
           </text>
         </g>
 
         {/* ── OE control lines to gates ── */}
-        <line x1={80} y1={230} x2={mosCX - 38} y2={pmosCY} stroke={oeColor} strokeWidth={1.5} strokeDasharray="4 3" />
-        <line x1={80} y1={310} x2={mosCX - 38} y2={nmosCY} stroke={oeColor} strokeWidth={1.5} strokeDasharray="4 3" />
+        <line x1={CIRCUIT.inputX + CIRCUIT.inputW} y1={pmosCY}
+          x2={CIRCUIT.mosX - 14} y2={pmosCY}
+          stroke={oeColor} strokeWidth={1.5} strokeDasharray="4 3" />
+        <line x1={CIRCUIT.inputX + CIRCUIT.inputW} y1={nmosCY}
+          x2={CIRCUIT.mosX - 14} y2={nmosCY}
+          stroke={oeColor} strokeWidth={1.5} strokeDasharray="4 3" />
 
-        {/* ── Bidirectional note during high-Z (circuit area) ── */}
-        {isHighZ && effectivePhaseProgress > 0.3 && (
-          <g opacity={(effectivePhaseProgress - 0.3) / 0.7}>
-            {/* Input path: Pad → Input Buffer → Core */}
-            <line x1={padCX + 40} y1={outputY} x2={padCX + 120} y2={outputY - 60}
-              stroke={THEME.status.hit} strokeWidth={2} strokeDasharray="6 4" />
-            <rect x={padCX + 120} y={outputY - 80} width={100} height={40} rx={6}
-              fill={THEME.status.hit} fillOpacity={0.15} stroke={THEME.status.hit} strokeWidth={1.5} />
-            <text x={padCX + 170} y={outputY - 55} textAnchor="middle" fill={THEME.status.hit} fontSize={14} fontWeight={600} fontFamily="Inter, sans-serif">
-              Input Buffer
-            </text>
-            <text x={padCX + 170} y={outputY - 38} textAnchor="middle" fill={THEME.status.hit} fontSize={13} fontFamily="Inter, sans-serif">
-              OE=0 时可作为输入
-            </text>
-          </g>
-        )}
-
-        {/* ── High-Z disconnected sparks ── */}
-        {isHighZ && effectivePhaseProgress > 0 && (
-          <g opacity={effectivePhaseProgress * 0.6}>
+        {/* ── High-Z sparks at output node ── */}
+        {isHighZ && effectiveProgress > 0.1 && (
+          <g opacity={effectiveProgress * 0.5}>
             {[0, 1, 2].map(i => {
-              const sx = padCX - 40 + Math.sin(phaseFrame * 0.3 + i * 2) * 10;
-              const sy = outputY + Math.cos(phaseFrame * 0.4 + i * 1.5) * 15;
+              const sx = sdX + Math.sin(phaseFrame * 0.3 + i * 2) * 8;
+              const sy = outputY + Math.cos(phaseFrame * 0.4 + i * 1.5) * 12;
               return (
-                <circle key={i} cx={sx} cy={sy} r={3} fill={THEME.text.muted}
-                  opacity={0.5 + Math.sin(phaseFrame * 0.5 + i) * 0.3} />
+                <circle key={i} cx={sx} cy={sy} r={2.5} fill={T.muted}
+                  opacity={0.4 + Math.sin(phaseFrame * 0.5 + i) * 0.3} />
               );
             })}
           </g>
         )}
+
       </svg>
     </AbsoluteFill>
   );

@@ -408,10 +408,10 @@ export const sceneRegistry: Record<string, SceneEntry<any>> = {
         { startFrame: 3970, endFrame: 4370, text: "输出驱动器利用更大的晶体管提供电流，" },
         { startFrame: 4370, endFrame: 4756, text: "推动 PCB 走线、连接器或者其他芯片的输入电容。" },
         // Segment 6: 18.72s (4756→5897)
-        { startFrame: 4756, endFrame: 5000, text: "但引脚不一定始终驱动总线。" },
-        { startFrame: 5000, endFrame: 5280, text: "当 OE 关闭时，上拉和下拉都断开，" },
-        { startFrame: 5280, endFrame: 5560, text: "引脚进入高阻态 Z。" },
-        { startFrame: 5560, endFrame: 5897, text: "它既不输出 0，也不输出 1，相当于暂时退出总线。" },
+        { startFrame: 4756, endFrame: 5140, text: "输出数据为零时，NMOS 导通，将 Pad 拉到低电平。" },
+        { startFrame: 5140, endFrame: 5520, text: "输出数据为一时，PMOS 导通，将 Pad 拉到高电平。" },
+        { startFrame: 5520, endFrame: 5710, text: "当 OE 关闭时，上拉和下拉都断开，引脚进入高阻态。" },
+        { startFrame: 5710, endFrame: 5897, text: "它既不输出零，也不输出一，相当于暂时退出总线。" },
         // Segment 7: 18.08s (5897→7000)
         { startFrame: 5897, endFrame: 6260, text: "外部引脚还可能接触人体、连接器和测试探针。" },
         { startFrame: 6260, endFrame: 6640, text: "瞬间静电电压可能远高于芯片正常工作电压。" },
