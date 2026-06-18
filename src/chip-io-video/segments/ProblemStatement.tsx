@@ -55,14 +55,14 @@ const spec: CalloutDemoSpec = {
     },
     {
       id: "esd",
-      targetX: 640,
-      targetY: 280,
+      targetX: 530,  // Pad left edge (external side)
+      targetY: 350,  // Pad vertical center
       label: "静电冲击",
       sublabel: "ESD 远超工作电压",
       preferredQuadrant: "top-left",
       color: RISK_COLOR,
-      dx: 0,
-      dy: -60,
+      dx: -20,
+      dy: -80,
       startFrame: 450,
     },
   ],

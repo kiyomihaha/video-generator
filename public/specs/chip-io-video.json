@@ -25,7 +25,7 @@
       { "id": "voltage", "targetX": 400, "targetY": 320, "label": "电平不同", "sublabel": "0.8V vs 3.3V", "preferredQuadrant": "top-left", "color": "#f87171", "startFrame": 60 },
       { "id": "drive", "targetX": 640, "targetY": 380, "label": "驱动不足", "sublabel": "核心晶体管能力弱", "preferredQuadrant": "bottom-left", "color": "#f87171", "startFrame": 120 },
       { "id": "noise", "targetX": 990, "targetY": 320, "label": "外部噪声", "sublabel": "PCB 走线拾取干扰", "preferredQuadrant": "top-right", "color": "#f87171", "startFrame": 180 },
-      { "id": "esd", "targetX": 640, "targetY": 220, "label": "静电冲击", "sublabel": "ESD 远超工作电压", "preferredQuadrant": "top-left", "color": "#f87171", "startFrame": 240 }
+      { "id": "esd", "targetX": 530, "targetY": 350, "label": "静电冲击", "sublabel": "ESD 远超工作电压", "preferredQuadrant": "top-left", "color": "#f87171", "dx": -20, "dy": -80, "startFrame": 450 }
     ],
     "connectors": [
       { "id": "core-pad", "fromX": 400, "fromY": 350, "toX": 530, "toY": 350, "color": "#a78bfa", "direction": "forward", "animated": true, "startFrame": 30 },
