@@ -31,7 +31,7 @@ const spec: CalloutDemoSpec = {
       sublabel: "0.8V vs 3.3V",
       preferredQuadrant: "top-left",
       color: RISK_COLOR,
-      startFrame: 60,
+      startFrame: 120,
     },
     {
       id: "drive",
@@ -41,7 +41,7 @@ const spec: CalloutDemoSpec = {
       sublabel: "核心晶体管能力弱",
       preferredQuadrant: "bottom-left",
       color: RISK_COLOR,
-      startFrame: 120,
+      startFrame: 240,
     },
     {
       id: "noise",
@@ -51,7 +51,7 @@ const spec: CalloutDemoSpec = {
       sublabel: "PCB 走线拾取干扰",
       preferredQuadrant: "top-right",
       color: RISK_COLOR,
-      startFrame: 180,
+      startFrame: 360,
     },
     {
       id: "esd",
@@ -63,7 +63,7 @@ const spec: CalloutDemoSpec = {
       color: RISK_COLOR,
       dx: 0,
       dy: -60,
-      startFrame: 240,
+      startFrame: 450,
     },
   ],
   connectors: [

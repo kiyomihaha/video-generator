@@ -15,24 +15,24 @@ const VH = 720;
 export const IODirectConnection: React.FC<{ spec?: DirectConnectionSpec }> = ({ spec }) => {
   const frame = useCurrentFrame();
 
-  // Phase timing
-  const phase1End = 90;    // show both sides
-  const phase2End = 180;   // red prohibition
-  const phase3End = 480;   // consequences (slow edge + noise)
-  const phase4End = 720;   // fade out
+  // Phase timing — spread across 20.8s (1247f)
+  const phase1End = 300;    // show both sides: 0-5s
+  const phase2End = 600;    // red prohibition: 5-10s
+  const phase3End = 1000;   // consequences: 10-16.7s
+  const phase4End = 1247;   // hold to end
 
-  const phase1 = clamp01(frame / 60);
-  const phase2 = frame >= 80 ? clamp01((frame - 80) / 60) : 0;
-  const phase3 = frame >= 170 ? clamp01((frame - 170) / 60) : 0;
+  const phase1 = clamp01(frame / 180);  // 3s fade in
+  const phase2 = frame >= 280 ? clamp01((frame - 280) / 120) : 0;
+  const phase3 = frame >= 580 ? clamp01((frame - 580) / 120) : 0;
 
-  // Slow edge wave animation
-  const waveProgress = frame >= 200 ? (frame - 200) / 200 : 0;
+  // Slow edge wave animation — starts at ~10s
+  const waveProgress = frame >= 600 ? (frame - 600) / 400 : 0;
   const waveX = 300 + waveProgress * 680;
 
-  // Noise pulse
-  const noiseFrame = frame >= 350 ? frame - 350 : 0;
-  const noiseVisible = noiseFrame > 0 && noiseFrame < 150;
-  const noiseAlpha = noiseVisible ? Math.sin(noiseFrame * 0.3) * 0.5 + 0.5 : 0;
+  // Noise pulse — starts at ~13s
+  const noiseFrame = frame >= 800 ? frame - 800 : 0;
+  const noiseVisible = noiseFrame > 0 && noiseFrame < 300;
+  const noiseAlpha = noiseVisible ? Math.sin(noiseFrame * 0.15) * 0.5 + 0.5 : 0;
 
   return (
     <AbsoluteFill style={{ backgroundColor: THEME.canvas.bg }}>
