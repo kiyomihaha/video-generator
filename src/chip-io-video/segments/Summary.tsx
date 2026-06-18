@@ -83,8 +83,11 @@ export const Summary: React.FC<{ spec?: TextEmphasisSpec }> = () => {
   const titleOpacity = progress >= p3
     ? easeOutCubic(clamp01((progress - p3) / (p4 - p3)))
     : 0;
-  const titleBaseY = 490;  // base position (moved down from 440)
+  const titleBaseY = 440;  // base position (moved up from 470)
   const titleY = titleBaseY - titleOpacity * 16;  // slight upward movement on focus
+  const titleFontSize = 56;
+  const subtitleFontSize = 26;
+  const subtitleY = titleY + titleFontSize + 24;  // 24px visual gap below title baseline
 
   // Overall fade out
   const overallOpacity = progress >= p5
@@ -183,17 +186,20 @@ export const Summary: React.FC<{ spec?: TextEmphasisSpec }> = () => {
           ))}
         </g>
 
-        {/* Final title — appears after p3 */}
+        {/* Final title — appears after p3 with staggered entrance */}
         {titleOpacity > 0 && (
-          <g opacity={titleOpacity}>
-            {/* Main title */}
+          <g>
+            {/* Main title — appears first */}
             <text x={VW / 2} y={titleY} textAnchor="middle"
-              fill={T.bright} fontSize={48} fontWeight={700} fontFamily="Inter, sans-serif">
+              fill={T.bright} fontSize={titleFontSize} fontWeight={700}
+              fontFamily="Inter, sans-serif" opacity={titleOpacity}>
               I/O Cell
             </text>
-            {/* Subtitle — 18px below main title */}
-            <text x={VW / 2} y={titleY + 18} textAnchor="middle"
-              fill={T.primary} fontSize={22} fontWeight={500} fontFamily="Inter, sans-serif">
+            {/* Subtitle — appears 8 frames later, slightly weaker color */}
+            <text x={VW / 2} y={subtitleY} textAnchor="middle"
+              fill={T.primary} fontSize={subtitleFontSize} fontWeight={400}
+              fontFamily="'Noto Sans SC', 'PingFang SC', sans-serif"
+              opacity={titleOpacity * 0.85}>
               数字逻辑连接物理世界的边界
             </text>
           </g>
