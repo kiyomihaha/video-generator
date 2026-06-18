@@ -182,7 +182,7 @@ export const InputIO: React.FC<{ spec?: CircuitWaveformLinkerAuthoring }> = ({ s
         {/* Slow/noisy waveform */}
         {slowAlpha > 0 && (
           <g opacity={slowAlpha}>
-            <text x={240} y={waveY - 8} textAnchor="middle" fill="#ef4444" fontSize={12} fontWeight={600} fontFamily="Inter, sans-serif">
+            <text x={240} y={waveY - 8} textAnchor="middle" fill="#ef4444" fontSize={14} fontWeight={600} fontFamily="Inter, sans-serif">
               缓冲前：慢边沿 + 噪声
             </text>
             <path d={slowNoisePath} fill="none" stroke="#ef4444" strokeWidth={2} />
@@ -192,7 +192,7 @@ export const InputIO: React.FC<{ spec?: CircuitWaveformLinkerAuthoring }> = ({ s
         {/* Conditioned waveform */}
         {condAlpha > 0 && (
           <g opacity={condAlpha}>
-            <text x={610} y={waveY - 8} textAnchor="middle" fill="#fbbf24" fontSize={12} fontWeight={600} fontFamily="Inter, sans-serif">
+            <text x={610} y={waveY - 8} textAnchor="middle" fill="#fbbf24" fontSize={14} fontWeight={600} fontFamily="Inter, sans-serif">
               缓冲后：边沿改善
             </text>
             <path d={conditionedPath} fill="none" stroke="#fbbf24" strokeWidth={2} />
@@ -202,7 +202,7 @@ export const InputIO: React.FC<{ spec?: CircuitWaveformLinkerAuthoring }> = ({ s
         {/* Clean digital waveform */}
         {cleanAlpha > 0 && (
           <g opacity={cleanAlpha}>
-            <text x={930} y={waveY - 8} textAnchor="middle" fill="#34d399" fontSize={12} fontWeight={600} fontFamily="Inter, sans-serif">
+            <text x={930} y={waveY - 8} textAnchor="middle" fill="#34d399" fontSize={14} fontWeight={600} fontFamily="Inter, sans-serif">
               Schmitt 后：干净数字信号
             </text>
             <path d={cleanPath} fill="none" stroke="#34d399" strokeWidth={2.5} />

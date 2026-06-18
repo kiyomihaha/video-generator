@@ -166,17 +166,17 @@ export const IOOutputDriver: React.FC<{ spec?: OutputDriverSpec }> = ({ spec: cu
 
         {/* ── Callouts ── */}
         <g opacity={phaseIndex === 0 ? currentProgress : 0.25}>
-          <text x={900} y={200} fill="#f472b6" fontSize={14} fontWeight={600} fontFamily="Inter, sans-serif">Source Current</text>
-          <text x={900} y={220} fill={T.muted} fontSize={12} fontFamily="Inter, sans-serif">VDD → Pad（上拉）</text>
+          <text x={900} y={200} fill="#f472b6" fontSize={16} fontWeight={600} fontFamily="Inter, sans-serif">Source Current</text>
+          <text x={900} y={222} fill={T.muted} fontSize={14} fontFamily="Inter, sans-serif">VDD → Pad（上拉）</text>
         </g>
         <g opacity={phaseIndex === 1 ? currentProgress : 0.25}>
-          <text x={900} y={440} fill="#60a5fa" fontSize={14} fontWeight={600} fontFamily="Inter, sans-serif">Sink Current</text>
-          <text x={900} y={460} fill={T.muted} fontSize={12} fontFamily="Inter, sans-serif">Pad → VSS（下拉）</text>
+          <text x={900} y={440} fill="#60a5fa" fontSize={16} fontWeight={600} fontFamily="Inter, sans-serif">Sink Current</text>
+          <text x={900} y={462} fill={T.muted} fontSize={14} fontFamily="Inter, sans-serif">Pad → VSS（下拉）</text>
         </g>
         {phaseIndex === 2 && (
           <g opacity={currentProgress}>
-            <text x={900} y={320} fill="#fbbf24" fontSize={14} fontWeight={600} fontFamily="Inter, sans-serif">Drive Strength</text>
-            <text x={900} y={340} fill={T.muted} fontSize={12} fontFamily="Inter, sans-serif">负载↑ → 边沿变慢</text>
+            <text x={900} y={320} fill="#fbbf24" fontSize={16} fontWeight={600} fontFamily="Inter, sans-serif">Drive Strength</text>
+            <text x={900} y={342} fill={T.muted} fontSize={14} fontFamily="Inter, sans-serif">负载↑ → 边沿变慢</text>
           </g>
         )}
 

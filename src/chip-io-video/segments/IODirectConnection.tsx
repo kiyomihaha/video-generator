@@ -46,17 +46,17 @@ export const IODirectConnection: React.FC<{ spec?: DirectConnectionSpec }> = ({ 
         <g opacity={easeOutCubic(phase1)}>
           <ChipBlock x={180} y={180} width={240} height={180} label="Core Logic" color="#a78bfa" />
           {/* Attributes */}
-          <text x={300} y={400} textAnchor="middle" fill="#a78bfa" fontSize={14} fontFamily="Inter, sans-serif">0.8V 供电</text>
-          <text x={300} y={422} textAnchor="middle" fill="#a78bfa" fontSize={14} fontFamily="Inter, sans-serif">弱驱动能力</text>
-          <text x={300} y={444} textAnchor="middle" fill="#a78bfa" fontSize={14} fontFamily="Inter, sans-serif">对噪声敏感</text>
+          <text x={300} y={400} textAnchor="middle" fill="#a78bfa" fontSize={16} fontFamily="Inter, sans-serif">0.8V 供电</text>
+          <text x={300} y={425} textAnchor="middle" fill="#a78bfa" fontSize={16} fontFamily="Inter, sans-serif">弱驱动能力</text>
+          <text x={300} y={450} textAnchor="middle" fill="#a78bfa" fontSize={16} fontFamily="Inter, sans-serif">对噪声敏感</text>
         </g>
 
         {/* External side */}
         <g opacity={easeOutCubic(phase1)}>
           <ChipBlock x={860} y={180} width={240} height={180} label="External" color="#34d399" />
-          <text x={980} y={400} textAnchor="middle" fill="#34d399" fontSize={14} fontFamily="Inter, sans-serif">3.3V 接口</text>
-          <text x={980} y={422} textAnchor="middle" fill="#34d399" fontSize={14} fontFamily="Inter, sans-serif">大负载电容</text>
-          <text x={980} y={444} textAnchor="middle" fill="#34d399" fontSize={14} fontFamily="Inter, sans-serif">有电气噪声</text>
+          <text x={980} y={400} textAnchor="middle" fill="#34d399" fontSize={16} fontFamily="Inter, sans-serif">3.3V 接口</text>
+          <text x={980} y={425} textAnchor="middle" fill="#34d399" fontSize={16} fontFamily="Inter, sans-serif">大负载电容</text>
+          <text x={980} y={450} textAnchor="middle" fill="#34d399" fontSize={16} fontFamily="Inter, sans-serif">有电气噪声</text>
         </g>
 
         {/* Red prohibition sign */}
