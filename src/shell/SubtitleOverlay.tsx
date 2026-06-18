@@ -51,15 +51,19 @@ export const SubtitleOverlay: React.FC<Props> = ({ subtitles, fps, bottomOffset 
   if (!active) return null;
 
   // Calculate opacity for smooth fade-out
+  // fadeOutEndFrame = frame at which subtitle is fully transparent
+  // Fade starts 15 frames before fadeOutEndFrame
   let opacity = 1;
-  if (active.fadeOutEndFrame !== undefined && frame >= active.fadeOutEndFrame) {
-    // Fade out from fadeOutEndFrame to endFrame
-    opacity = interpolate(
-      frame,
-      [active.fadeOutEndFrame, active.endFrame],
-      [1, 0],
-      { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-    );
+  if (active.fadeOutEndFrame !== undefined) {
+    const fadeStart = active.fadeOutEndFrame - FADE_FRAMES;
+    if (frame >= fadeStart) {
+      opacity = interpolate(
+        frame,
+        [fadeStart, active.fadeOutEndFrame],
+        [1, 0],
+        { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+      );
+    }
   }
 
   return (

@@ -20,12 +20,15 @@ import { Summary } from "./segments/Summary";
 const S = THEME.canvas;
 const FADE_FRAMES = 18; // 0.3s at 60fps
 
-// Audio volume curve — fade in first 0.2s, fade out last 0.3s, stay at 1 in between
+// Audio volume curve — fade in first 0.2s, fade out before WAV ends
 const audioVolume = (frame: number, totalFrames: number) => {
   const fadeIn = interpolate(frame, [0, 12], [0, 1], { extrapolateRight: "clamp" });
+  // WAV ends at totalFrames - FADE_FRAMES (18f buffer)
+  // Fade out 18 frames before WAV ends
+  const wavEnd = totalFrames - FADE_FRAMES;
   const fadeOut = interpolate(
     frame,
-    [totalFrames - FADE_FRAMES, totalFrames],
+    [wavEnd - FADE_FRAMES, wavEnd],
     [1, 0],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
