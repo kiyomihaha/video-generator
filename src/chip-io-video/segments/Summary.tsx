@@ -79,11 +79,12 @@ export const Summary: React.FC<{ spec?: TextEmphasisSpec }> = () => {
     return easeOutCubic(clamp01((progress - capStart) / (capEnd - capStart)));
   };
 
-  // Final title
+  // Final title — positioned below capabilities, above subtitle safety zone
   const titleOpacity = progress >= p3
     ? easeOutCubic(clamp01((progress - p3) / (p4 - p3)))
     : 0;
-  const titleY = 440 - titleOpacity * 20; // slight upward movement
+  const titleBaseY = 490;  // base position (moved down from 440)
+  const titleY = titleBaseY - titleOpacity * 16;  // slight upward movement on focus
 
   // Overall fade out
   const overallOpacity = progress >= p5
@@ -190,8 +191,8 @@ export const Summary: React.FC<{ spec?: TextEmphasisSpec }> = () => {
               fill={T.bright} fontSize={48} fontWeight={700} fontFamily="Inter, sans-serif">
               I/O Cell
             </text>
-            {/* Subtitle */}
-            <text x={VW / 2} y={titleY + 40} textAnchor="middle"
+            {/* Subtitle — 18px below main title */}
+            <text x={VW / 2} y={titleY + 18} textAnchor="middle"
               fill={T.primary} fontSize={22} fontWeight={500} fontFamily="Inter, sans-serif">
               数字逻辑连接物理世界的边界
             </text>
