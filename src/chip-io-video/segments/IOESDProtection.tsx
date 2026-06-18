@@ -159,12 +159,10 @@ export const IOESDProtection: React.FC<{ spec?: ESDProtectionSpec }> = ({ spec: 
           </g>
         )}
 
-        {/* Phase label (except recovery which has its own) */}
-        {phaseIndex < 3 && (
+        {/* Phase 0 label */}
+        {phaseIndex === 0 && (
           <text x={VW / 2} y={80} textAnchor="middle" fill={T.bright} fontSize={16} fontWeight={600} fontFamily="Inter, sans-serif">
-            {phaseIndex === 0 && "① 静电脉冲击中 Pad"}
-            {phaseIndex === 1 && "② 正向冲击：D1 导通 → VDD 泄放"}
-            {phaseIndex === 2 && "③ 负向冲击：D2 导通 → VSS 泄放"}
+            ① 静电脉冲击中 Pad
           </text>
         )}
       </svg>
