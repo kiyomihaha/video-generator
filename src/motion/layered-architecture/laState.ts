@@ -195,7 +195,7 @@ export function computeLAState(schedule: LASchedule, frame: number): LAState {
       if (effectiveEndFrame > 0 && frame >= effectiveEndFrame) continue;
 
       const elapsed = frame - effectiveStart;
-      const fadeInDuration = Math.round(0.2 * schedule.fps);
+      const fadeInDuration = Math.round(0.4 * schedule.fps);
       const opacity = easeOutCubic(clamp01(elapsed / fadeInDuration));
 
       callouts.push({

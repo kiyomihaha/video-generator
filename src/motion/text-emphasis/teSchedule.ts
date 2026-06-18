@@ -19,20 +19,20 @@ const DEFAULT_LINE_HEIGHT = 1.6;
 function entranceDefaults(type: string, fps: number): ResolvedEntrance {
   switch (type) {
     case "none": return { type: "none", durationFrames: 0 };
-    case "fade-in": return { type: "fade-in", durationFrames: Math.round(0.35 * fps) };
+    case "fade-in": return { type: "fade-in", durationFrames: Math.round(0.5 * fps) };
     case "scale-up": return { type: "scale-up", durationFrames: Math.round(0.5 * fps) };
     case "slide-up": return { type: "slide-up", durationFrames: Math.round(0.4 * fps) };
     case "wipe-left": return { type: "wipe-left", durationFrames: Math.round(0.4 * fps) };
     case "typewriter": return { type: "typewriter", durationFrames: Math.round(0.5 * fps) };
-    default: return { type: "fade-in", durationFrames: Math.round(0.35 * fps) };
+    default: return { type: "fade-in", durationFrames: Math.round(0.5 * fps) };
   }
 }
 
 function exitDefaults(type: string, fps: number): ResolvedExit {
   switch (type) {
     case "none": return { type: "none", durationFrames: 0 };
-    case "fade-out": return { type: "fade-out", durationFrames: Math.round(0.3 * fps) };
-    default: return { type: "fade-out", durationFrames: Math.round(0.3 * fps) };
+    case "fade-out": return { type: "fade-out", durationFrames: Math.round(0.5 * fps) };
+    default: return { type: "fade-out", durationFrames: Math.round(0.5 * fps) };
   }
 }
 

@@ -69,7 +69,7 @@ function computeDecayedIntensity(
   frame: number,
   fps: number,
 ): { intensity: number; residual: number; prevState: VisualBaseState } {
-  const decayFrames = Math.max(1, Math.round(0.133 * fps)); // ~133ms decay
+  const decayFrames = Math.max(1, Math.round(0.3 * fps));
   const rawIntensity = targetState === "IDLE" ? 0.2 : 1;
 
   if (!transition || transition.prevState === targetState) {

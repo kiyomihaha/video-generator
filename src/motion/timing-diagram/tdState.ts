@@ -35,7 +35,7 @@ export function tdState(
 
       // Fade-in: segment appears when cursor reaches its startCycle
       const fadeInStart = (seg.startCycle - 0.5) * cyclePeriodFrames;
-      const fadeInEnd = fadeInStart + cyclePeriodFrames * 0.3;
+      const fadeInEnd = fadeInStart + cyclePeriodFrames * 0.6;
       const opacity = clamp01((frame - fadeInStart) / Math.max(fadeInEnd - fadeInStart, 1));
 
       // Highlight: cursor is within this segment

@@ -50,8 +50,8 @@ export function computeLASchedule(spec: LayeredArchitectureSpec, fps: number): L
   const layerWidth = spec.layerWidth ?? 600;
 
   // Fps-derived animation durations
-  const enterFrames = Math.round(0.25 * fps);
-  const exitFrames = Math.round(0.3 * fps);
+  const enterFrames = Math.round(0.4 * fps);
+  const exitFrames = Math.round(0.45 * fps);
   const flowFrames = Math.round(1.0 * fps);
 
   // Compute beat-to-frame conversion
