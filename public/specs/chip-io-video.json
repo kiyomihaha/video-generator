@@ -1,18 +1,18 @@
 {
   "segmentFrames": {
-    "problemStatement": 420,
-    "ioBoundary": 660,
-    "directConnection": 720,
-    "inputIO": 780,
-    "outputDriver": 840,
-    "tristate": 780,
-    "esdProtection": 540,
-    "problemList": 540,
-    "summary": 480
+    "problemStatement": 594,
+    "ioBoundary": 748,
+    "directConnection": 1247,
+    "inputIO": 1016,
+    "outputDriver": 1151,
+    "tristate": 1141,
+    "esdProtection": 1103,
+    "problemList": 930,
+    "summary": 920
   },
   "problemStatement": {
     "title": "芯片内部已经产生了 0 和 1，为什么不能直接连到引脚？",
-    "durationInFrames": 420,
+    "durationInFrames": 594,
     "fps": 60,
     "diagram": {
       "nodes": [
@@ -64,7 +64,7 @@
   "directConnection": {
     "core": { "label": "Core Logic", "voltage": "0.8V", "traits": ["弱驱动", "敏感"], "color": "#a78bfa" },
     "external": { "label": "External", "voltage": "3.3V", "traits": ["大负载", "有噪声"], "color": "#34d399" },
-    "durationFrames": 720
+    "durationFrames": 1247
   },
   "inputIO": {
     "title": "输入 I/O — 信号进入芯片的旅程",
@@ -107,7 +107,7 @@
       { "label": "DATA = 0 → NMOS 导通", "dataValue": 0, "activeMos": "nmos", "currentDirection": "sink" },
       { "label": "多负载 → 边沿变慢", "dataValue": 1, "activeMos": "pmos", "currentDirection": "source" }
     ],
-    "phaseFrames": 280,
+    "phaseFrames": 384,
     "loadCount": 3
   },
   "tristate": {
@@ -116,10 +116,10 @@
       { "label": "OE=1, DATA=1 → PMOS 导通, Pad=1", "oe": 1, "data": 1, "padOutput": 1 },
       { "label": "OE=0 → 高阻态 Z, 引脚断开", "oe": 0, "data": "Z", "padOutput": "Z" }
     ],
-    "phaseFrames": 260
+    "phaseFrames": 380
   },
   "esdProtection": {
-    "phaseFrames": 135
+    "phaseFrames": 276
   },
   "problemList": {
     "items": [
@@ -130,7 +130,7 @@
       { "icon": "🛡️", "label": "ESD 风险", "description": "无保护引脚被静电击穿", "color": "#a78bfa" },
       { "icon": "📡", "label": "串扰噪声", "description": "长平行走线耦合干扰信号", "color": "#60a5fa" }
     ],
-    "itemFrames": 90
+    "itemFrames": 155
   },
   "summary": {
     "width": 1280,
