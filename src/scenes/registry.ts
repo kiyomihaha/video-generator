@@ -390,40 +390,42 @@ export const sceneRegistry: Record<string, SceneEntry<any>> = {
       subtitles: [
         // Segment 1: 9.60s (0→594)
         { startFrame: 0, endFrame: 300, text: "芯片内部已经产生了 0 和 1，" },
-        { startFrame: 300, endFrame: 594, text: "为什么不能直接连到引脚？", fadeOutEndFrame: 594 },
+        { startFrame: 300, endFrame: 594, text: "为什么不能直接连到引脚？", fadeOutEndFrame: 576 },
         // Segment 2: 12.16s (594→1342)
         { startFrame: 594, endFrame: 960, text: "芯片要连接按键、传感器、存储器、显示屏和其他芯片。" },
-        { startFrame: 960, endFrame: 1342, text: "真正完成连接的，是一整套 I/O 接口电路。", fadeOutEndFrame: 1342 },
+        { startFrame: 960, endFrame: 1342, text: "真正完成连接的，是一整套 I/O 接口电路。", fadeOutEndFrame: 1324 },
         // Segment 3: 20.48s (1342→2589)
-        // Waveforms start at ~1942 (segment frame 600). Subtitles end before waveforms.
+        // Waveforms start at ~1942 (segment frame 600). Fade subtitles before waveforms.
         { startFrame: 1342, endFrame: 1640, text: "芯片核心可能工作在 0.8 伏，" },
-        { startFrame: 1640, endFrame: 1920, text: "但外部接口可能是 1.8 伏或 3.3 伏。", fadeOutEndFrame: 1920 },
-        // No subtitles during waveform display (1920-2589)
+        { startFrame: 1640, endFrame: 1920, text: "但外部接口可能是 1.8 伏或 3.3 伏。" },
+        // These subtitles fade out before waveforms appear
+        { startFrame: 1920, endFrame: 2260, text: "核心晶体管驱动能力弱，也承受不了外部静电。", fadeOutEndFrame: 1942 },
+        { startFrame: 2260, endFrame: 2589, text: "所以 I/O 必须完成电平适配、信号整形、功率驱动和保护。", fadeOutEndFrame: 2262 },
         // Segment 4: 16.64s (2589→3605)
         { startFrame: 2589, endFrame: 2950, text: "信号进入芯片时，首先经过 Pad 和 ESD 保护。" },
         { startFrame: 2950, endFrame: 3300, text: "输入缓冲器再把可能缓慢、带噪声的外部电压，" },
-        { startFrame: 3300, endFrame: 3605, text: "转换成内部明确的 0 或 1。", fadeOutEndFrame: 3605 },
+        { startFrame: 3300, endFrame: 3605, text: "转换成内部明确的 0 或 1。", fadeOutEndFrame: 3587 },
         // Segment 5: 18.88s (3605→4756)
         { startFrame: 3605, endFrame: 3970, text: "信号离开芯片时，核心只负责给出数据。" },
         { startFrame: 3970, endFrame: 4370, text: "输出驱动器利用更大的晶体管提供电流，" },
-        { startFrame: 4370, endFrame: 4756, text: "推动 PCB 走线、连接器或者其他芯片的输入电容。", fadeOutEndFrame: 4756 },
+        { startFrame: 4370, endFrame: 4756, text: "推动 PCB 走线、连接器或者其他芯片的输入电容。", fadeOutEndFrame: 4738 },
         // Segment 6: 18.72s (4756→5897), with 60f intro hold
         { startFrame: 4816, endFrame: 5196, text: "输出数据为零时，NMOS 导通，将 Pad 拉到低电平。" },
         { startFrame: 5196, endFrame: 5576, text: "输出数据为一时，PMOS 导通，将 Pad 拉到高电平。" },
         { startFrame: 5576, endFrame: 5736, text: "当 OE 关闭时，上拉和下拉都断开，引脚进入高阻态。" },
-        { startFrame: 5736, endFrame: 5897, text: "它既不输出零，也不输出一，相当于暂时退出总线。", fadeOutEndFrame: 5897 },
+        { startFrame: 5736, endFrame: 5897, text: "它既不输出零，也不输出一，相当于暂时退出总线。", fadeOutEndFrame: 5879 },
         // Segment 7: 18.08s (5897→7000)
         { startFrame: 5897, endFrame: 6260, text: "外部引脚还可能接触人体、连接器和测试探针。" },
         { startFrame: 6260, endFrame: 6640, text: "瞬间静电电压可能远高于芯片正常工作电压。" },
-        { startFrame: 6640, endFrame: 7000, text: "ESD 钳位电路会优先把这股能量导向电源或地，保护核心器件。", fadeOutEndFrame: 7000 },
+        { startFrame: 6640, endFrame: 7000, text: "ESD 钳位电路会优先把这股能量导向电源或地，保护核心器件。", fadeOutEndFrame: 6982 },
         // Segment 8: 15.20s (7000→7930)
         { startFrame: 7000, endFrame: 7310, text: "很多板级问题，不是算法算错了，" },
         { startFrame: 7310, endFrame: 7620, text: "而是 I/O 边界没有处理好：" },
-        { startFrame: 7620, endFrame: 7930, text: "电平不兼容、驱动不足、过冲振铃、总线争用、ESD 保护缺失，以及串扰噪声。", fadeOutEndFrame: 7930 },
+        { startFrame: 7620, endFrame: 7930, text: "电平不兼容、驱动不足、过冲振铃、总线争用、ESD 保护缺失，以及串扰噪声。", fadeOutEndFrame: 7912 },
         // Segment 9: 15.04s (7930→8850)
         { startFrame: 7930, endFrame: 8220, text: "所以，输入输出接口不是核心逻辑的一根延长线。" },
         { startFrame: 8220, endFrame: 8500, text: "它负责接收、驱动、切换、保护和电气适配。" },
-        { startFrame: 8500, endFrame: 8850, text: "输入输出单元，才是数字逻辑真正连接物理世界的边界。", fadeOutEndFrame: 8850 },
+        { startFrame: 8500, endFrame: 8850, text: "输入输出单元，才是数字逻辑真正连接物理世界的边界。", fadeOutEndFrame: 8832 },
       ],
     },
   },
