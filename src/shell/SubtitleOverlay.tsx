@@ -71,7 +71,8 @@ export const SubtitleOverlay: React.FC<Props> = ({ subtitles, fps, bottomOffset 
       <div
         style={{
           ...CONTAINER_STYLE,
-          bottom: bottomOffset,
+          // If subtitle has custom y, use it as top position instead of bottom
+          ...(active.y !== undefined ? { top: active.y, bottom: "auto", height: "auto" } : { bottom: bottomOffset }),
           opacity,
         }}
       >
