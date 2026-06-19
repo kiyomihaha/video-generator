@@ -2,6 +2,8 @@
 
 项目约定以根目录 `AGENTS.md` 为准。
 
+开始编码前必须阅读 `docs/agent-handoff.md` 并检查 Git 状态。完成任何仓库改动后，必须在该文件顶部追加交接记录，写明改动、验证和遗留问题。
+
 编码时使用 `.claude/skills/remotion/` 中的 Remotion 最佳实践。完成编码后，使用 `.agents/skills/video-release/` 执行：
 
 1. TypeScript 检查

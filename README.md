@@ -65,6 +65,15 @@ npm run release:qa -- -Video out/ChipIOVideo-1080p-bgm.mp4
 5. 分辨率、帧数、响度、静音和黑帧质检
 6. 仅保留最终交付物
 
+## Agent 交接标准
+
+所有 Claude、Codex 或其他编码 Agent 共用 `docs/agent-handoff.md` 作为项目状态入口。
+
+- 开始任务前：阅读交接文件，并检查 `git status` 与最近提交。
+- 完成仓库改动后：更新当前基线，在变更记录顶部追加改动、验证和遗留问题。
+- 聊天记录不作为唯一交接依据。
+- 新 Agent 不应依赖上一位 Agent 的私有上下文。
+
 ## 项目结构
 
 ```text

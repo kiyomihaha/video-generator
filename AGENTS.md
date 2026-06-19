@@ -24,6 +24,8 @@
 
 ## 约定
 
+- 所有 Agent 开始任务前必须阅读 `docs/agent-handoff.md`。
+- 所有改变仓库的任务完成后必须更新 `docs/agent-handoff.md`。
 - Composition 在 `src/scenes/registry.ts` 集中注册。
 - 静态资源放在 `public/`。
 - 生成视频、封面和审查截图不进入 Git。
