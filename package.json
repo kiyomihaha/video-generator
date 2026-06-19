@@ -5,8 +5,12 @@
   "scripts": {
     "start": "npx remotion studio",
     "preview": "npx remotion studio",
-    "render": "npx remotion render src/index.ts \"$npm_config_video\" \"out/$npm_config_video.mp4\"",
-    "still": "npx remotion still src/index.ts \"$npm_config_video\" \"out/$npm_config_video-frame.png\" --frame=30"
+    "render": "node scripts/render.mjs",
+    "still": "node scripts/still.mjs",
+    "typecheck": "tsc --noEmit",
+    "release:render": "powershell -NoProfile -ExecutionPolicy Bypass -File .agents/skills/video-release/scripts/render-release.ps1",
+    "release:mix": "powershell -NoProfile -ExecutionPolicy Bypass -File .agents/skills/video-release/scripts/mix-bgm.ps1",
+    "release:qa": "powershell -NoProfile -ExecutionPolicy Bypass -File .agents/skills/video-release/scripts/qa-video.ps1"
   },
   "dependencies": {
     "@esbuild/linux-x64": "^0.28.0",

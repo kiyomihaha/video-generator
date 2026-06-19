@@ -1,36 +1,45 @@
 node_modules/
 out/
 dist/
-.gstack/
-.omc/
 
-# Large model files
+# Local review and generated artifacts
+.codex-review/
+test-frames/
+review-screenshots/
+public/review-screenshots/
+public/shell-test-frame.png
+tmp/
+*.cjs
+nul
+
+# Local tools, models, installers and applications
 tools/
 checkpoints*/
 campplus_cache/
 w2v_bert/
 maskgct_cache/
 bigvgan_cache/
+MIMOTTS/
+MiMo.Audio.Workstation.Setup.*.exe
 
-# Generated audio
-public/*.wav
-public/*.mp3
-
-# Screenshots
-实测图片/
-public/review-screenshots/
-
-# Temp files
-*.cjs
-nul
+# Agent runtime state
+.omc/
+.gstack/
+.codegraph/
 .understand-anything/
 .sixth/
-test-frames/
-tmp/
-review-screenshots/
-public/shell-test-frame.png
-
-# Agent/tool configs
-.agents/
-.codegraph/
+.claude/settings.json
 .claude/settings.local.json
+.claude/skills/hermes.md
+.claude/skills/taste-skill/
+
+# Keep only reusable project skills under .agents
+.agents/*
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/video-release/
+!.agents/skills/video-release/**
+
+# Generated root-level test audio
+public/*.wav
+public/*.mp3

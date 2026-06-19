@@ -1,0 +1,4 @@
+interface:
+  display_name: "Video Release"
+  short_description: "Render, cover, mix and QA Remotion releases"
+  default_prompt: "Use $video-release to render and package a Remotion video for publishing."
