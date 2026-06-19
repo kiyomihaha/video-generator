@@ -43,6 +43,77 @@
 
 ## 变更记录
 
+### 2026-06-19 — ChipIOVideo 完整交付
+
+提交：`f1f8d5e`
+
+改动：
+
+- 新增 `src/chip-io-video/`：9 段落视频组件 + 4 个共享基础组件
+- 新增 `public/specs/chip-io-video.json`：完整视频 spec
+- 新增 `public/audio/chip-io-video/`：9 段 WAV 旁白（已归一化 -16 LUFS）
+- 修改 `src/scenes/registry.ts`：注册 ChipIOVideo + 逐句字幕
+- 修改 `src/shell/SubtitleOverlay.tsx`：支持 fadeOutEndFrame + 自定义 y 位置
+- 修改 `src/shell/types.ts`：SubtitleEntry 新增 fadeOutEndFrame 和 y 字段
+- Summary 场景：连续收束设计，无空白帧
+- IOTristate 场景：完整布局重构，三层分区
+- ESD 场景：电路整体上移，阶段标签与标题分层
+- 波形字幕：段落 3 字幕移至 y=460 避开波形
+
+验证：
+
+- `npx tsc --noEmit`
+- 完整 2 分 29.5 秒预览渲染
+- 4 个 P1 回归验证全部通过
+
+遗留：
+
+- 音频响度集中在 -16.8 至 -17.5 LUFS，严格 -16 LUFS 还差约 1 dB
+- 部分辅助标注 12-16px，手机端偏小
+- 片尾 Summary 淡出与外层场景淡叠加，尾部略暗
+
+### 2026-06-19 — Legend primitive
+
+提交：`7f08713`
+
+改动：
+
+- 新增 `src/motion/legend/`：spec → schedule → state 三层 primitive
+- 新增 `src/scenes/LegendScene.tsx`：SVG 渲染器
+- 新增 `src/legend-demo/`：demo 组件
+- 新增 `public/specs/legend-demo.json`：Cache Levels fixture
+- 修改 `src/scenes/registry.ts`：注册 LegendDemo
+
+验证：
+
+- `npx tsc --noEmit`
+- 5 个测试帧渲染成功
+
+遗留：
+
+- 无
+
+### 2026-06-19 — 动画节奏修正
+
+提交：`6e181ce`
+
+改动：
+
+- `src/motion/text-emphasis/teSchedule.ts`：fade-in 0.35→0.5s，fade-out 0.3→0.5s
+- `src/motion/layered-architecture/laSchedule.ts`：enter 0.25→0.4s，exit 0.3→0.45s
+- `src/motion/layered-architecture/laState.ts`：callout 0.2→0.4s
+- `src/motion/linker/linkerState.ts`：zone decay 0.133→0.3s
+- `src/motion/timing-diagram/tdState.ts`：segment fade-in 0.3→0.6x cyclePeriod
+
+验证：
+
+- `npx tsc --noEmit`
+- 关键帧渲染通过
+
+遗留：
+
+- 无
+
 ### 2026-06-19 — 统一 Agent 交接标准
 
 提交：本条记录所在提交
