@@ -1,0 +1,14 @@
+{
+  "segmentFrames": {
+    "overview": 780,
+    "init": 960,
+    "adminCmd": 1200,
+    "sqeConstruct": 1020,
+    "doorbell": 840,
+    "controllerProcess": 960,
+    "dataTransfer": 1020,
+    "completion": 1020,
+    "hostProcess": 1020,
+    "summary": 720
+  }
+}

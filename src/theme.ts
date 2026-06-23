@@ -77,4 +77,16 @@ export const THEME = {
     layer7: "#06b6d4",
     layer8: "#84cc16",
   },
+  // NVMe storage architecture
+  nvme: {
+    host: "#60a5fa",       // 主机侧（CPU/Driver）
+    controller: "#a78bfa", // NVMe 控制器
+    memory: "#fbbf24",     // 主机内存（SQ/CQ/Buffer）
+    pcie: "#34d399",       // PCIe 链路
+    storage: "#f472b6",    // 存储介质
+    doorbell: "#ef4444",   // Doorbell 寄存器
+    interrupt: "#f97316",  // MSI-X 中断
+    sqe: "#38bdf8",        // SQE 命令条目
+    cqe: "#10b981",        // CQE 完成条目
+  },
 } as const;

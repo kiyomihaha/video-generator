@@ -21,6 +21,7 @@ import laSpec from "../../public/specs/layered-architecture-demo.json";
 import calloutSpec from "../../public/specs/callout-demo.json";
 import legendSpec from "../../public/specs/legend-demo.json";
 import chipIoVideoSpec from "../../public/specs/chip-io-video.json";
+import nvmeVideoSpec from "../../public/specs/nvme-video.json";
 
 import { digitalTimingSpecSchema } from "../motion/primitives/schemas";
 import { pipelineSpecSchema } from "../motion/pipeline/schemas";
@@ -46,6 +47,7 @@ import { LayeredArchitectureDemo } from "../layered-architecture-demo/index";
 import { CalloutDemo } from "../callout-demo/index";
 import { LegendDemo } from "../legend-demo/index";
 import { ChipIOVideo } from "../chip-io-video/index";
+import { NVMeVideo } from "../nvme-video/index";
 
 import type { DigitalTimingSpec } from "../motion/primitives/types";
 import type { PipelineSpec } from "../motion/pipeline/types";
@@ -65,6 +67,8 @@ import type { CalloutDemoSpec } from "../callout-demo/types";
 import { legendSpecSchema } from "../motion/legend/schemas";
 import type { LegendSpec } from "../motion/legend/types";
 import type { ChipIOVideoSpec } from "../chip-io-video/types";
+import type { NVMeVideoSpec } from "../nvme-video/types";
+import { nvmeVideoSpecSchema } from "../nvme-video/types";
 import type { VideoShellConfig } from "../shell/types";
 
 interface SceneEntry<TSpec> {
@@ -150,6 +154,14 @@ const calcChipIOVideo: CalculateMetadataFunction<{ spec: ChipIOVideoSpec }> = ({
   const sf = props.spec.segmentFrames;
   const total = sf.problemStatement + sf.ioBoundary + sf.directConnection + sf.inputIO
     + sf.outputDriver + sf.tristate + sf.esdProtection + sf.problemList + sf.summary;
+  return { durationInFrames: total };
+};
+
+// NVMeVideo: duration from sum of segmentFrames
+const calcNVMeVideo: CalculateMetadataFunction<{ spec: NVMeVideoSpec }> = ({ props }) => {
+  const sf = props.spec.segmentFrames;
+  const total = sf.overview + sf.init + sf.adminCmd + sf.sqeConstruct + sf.doorbell
+    + sf.controllerProcess + sf.dataTransfer + sf.completion + sf.hostProcess + sf.summary;
   return { durationInFrames: total };
 };
 
@@ -427,5 +439,13 @@ export const sceneRegistry: Record<string, SceneEntry<any>> = {
         { startFrame: 8500, endFrame: 8850, text: "输入输出单元，才是数字逻辑真正连接物理世界的边界。", fadeOutEndFrame: 8832 },
       ],
     },
+  },
+  NVMeVideo: {
+    component: NVMeVideo,
+    spec: nvmeVideoSpecSchema.parse(nvmeVideoSpec),
+    calculateMetadata: calcNVMeVideo,
+    fps: 60,
+    width: 1280,
+    height: 720,
   },
 };
